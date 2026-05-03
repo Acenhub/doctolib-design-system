@@ -46,6 +46,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-surface: var(--surface);
+  --font-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-display: "Inter", "Helvetica Neue", system-ui, sans-serif;
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -62,26 +70,47 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Doctolib Design System
+   * Primary: Doctolib Blue (#107ACA equivalent)
+   * Navy:    Deep navy hero background
+   * Surface: Soft off-white
+   */
+  --radius: 1rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.25 0.06 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.25 0.06 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --popover-foreground: oklch(0.25 0.06 250);
+  --primary: oklch(0.58 0.16 244);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0.015 240);
+  --secondary-foreground: oklch(0.3 0.07 248);
+  --muted: oklch(0.97 0.008 240);
+  --muted-foreground: oklch(0.5 0.03 245);
+  --accent: oklch(0.93 0.04 215);
+  --accent-foreground: oklch(0.3 0.08 248);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.92 0.012 245);
+  --input: oklch(0.94 0.012 245);
+  --ring: oklch(0.58 0.16 244);
+
+  /* Doctolib brand tokens */
+  --navy: oklch(0.32 0.09 248);
+  --navy-foreground: oklch(1 0 0);
+  --primary-soft: oklch(0.94 0.04 240);
+  --success: oklch(0.62 0.14 160);
+  --warning: oklch(0.78 0.15 75);
+  --surface: oklch(0.985 0.005 240);
+
+  --gradient-hero: linear-gradient(135deg, oklch(0.32 0.09 248), oklch(0.42 0.12 245));
+  --gradient-primary: linear-gradient(135deg, oklch(0.58 0.16 244), oklch(0.66 0.14 230));
+  --shadow-soft: 0 4px 16px -4px oklch(0.32 0.09 248 / 0.12);
+  --shadow-elevated: 0 16px 40px -12px oklch(0.32 0.09 248 / 0.22);
+  --shadow-pill: 0 6px 20px -6px oklch(0.58 0.16 244 / 0.45);
+  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
