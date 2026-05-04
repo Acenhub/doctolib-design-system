@@ -1,276 +1,594 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin, Calendar, MessageCircle, Heart, Video, Bell, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: LabinaLanding,
   head: () => ({
     meta: [
-      { title: "Doctolib · Design System" },
-      { name: "description", content: "Système de design Doctolib — couleurs, typographie, composants et patterns inspirés de doctolib.fr." },
+      { title: "Labina — Apportez votre pierre à l'édifice" },
+      {
+        name: "description",
+        content:
+          "Labina (لبنة) — plateforme de financement participatif communautaire islamique. Plus on est nombreux, moins chacun contribue.",
+      },
+      { property: "og:title", content: "Labina — Apportez votre pierre à l'édifice" },
+      {
+        property: "og:description",
+        content: "Financez ensemble mosquées, écoles coraniques et projets humanitaires.",
+      },
     ],
   }),
 });
 
-const colorTokens = [
-  { name: "primary", label: "Doctolib Blue", className: "bg-primary" },
-  { name: "navy", label: "Deep Navy", className: "bg-navy" },
-  { name: "primary-soft", label: "Soft Blue", className: "bg-primary-soft" },
-  { name: "accent", label: "Accent", className: "bg-accent" },
-  { name: "success", label: "Success", className: "bg-success" },
-  { name: "warning", label: "Warning", className: "bg-warning" },
-  { name: "destructive", label: "Destructive", className: "bg-destructive" },
-  { name: "surface", label: "Surface", className: "bg-surface border" },
-];
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.labina.app";
+const MEMBER_THRESHOLD = 500;
+const CURRENT_MEMBERS = 312; // demo value, masked under threshold
+const PROJECT_GOAL = 200_000;
 
-function Logo() {
+const C = {
+  cream: "#faf8f4",
+  dark: "#1a1614",
+  cardDark: "#2c2820",
+  borderDark: "#3d3530",
+  gold: "#c9a96e",
+  green: "#2d6a4f",
+  text: "#1a1614",
+  textSec: "#5a4e38",
+  textMuted: "#8a7a60",
+  textFaint: "#b8a88a",
+};
+
+const fontDisplay = "'Playfair Display', Georgia, serif";
+const fontSans = "'DM Sans', system-ui, sans-serif";
+const fontMono = "'DM Mono', ui-monospace, monospace";
+const fontArabic = "'Noto Sans Arabic', sans-serif";
+
+/* ───────── Brick wall ───────── */
+function BrickWall({ members, rows = 10, cols = 5 }: { members: number; rows?: number; cols?: number }) {
+  const max = rows * cols;
+  const lit = Math.min(max, Math.floor((members / 10000) * max));
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">D</div>
-      <span className="text-xl font-semibold tracking-tight text-navy">Doctolib</span>
-      <Badge variant="secondary" className="ml-2 bg-primary-soft text-primary">Design System</Badge>
+    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+      {Array.from({ length: rows }, (_, r) => (
+        <div
+          key={r}
+          style={{ display: "flex", gap: 5, marginLeft: r % 2 === 1 ? 22 : 0 }}
+        >
+          {Array.from({ length: cols }, (_, c) => {
+            const idx = r * cols + c;
+            const active = idx < lit;
+            return (
+              <div
+                key={c}
+                style={{
+                  flex: 1,
+                  height: 22,
+                  background: active ? C.gold : C.cardDark,
+                  border: `1.5px solid ${active ? C.gold : C.borderDark}`,
+                  borderRadius: 3,
+                  transition: "background 0.35s ease, border-color 0.35s ease, opacity 0.35s ease",
+                  transitionDelay: active ? `${idx * 12}ms` : "0ms",
+                }}
+              />
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
 
-function Index() {
+/* ───────── Animated counter ───────── */
+function useAnimatedNumber(target: number, duration = 1800) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(Math.floor(target * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
+
+/* ───────── Email form ───────── */
+function EmailForm({ dark = false, ctaLabel }: { dark?: boolean; ctaLabel: string }) {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
   return (
-    <div className="min-h-screen bg-surface text-foreground">
-      {/* Top nav */}
-      <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Logo />
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            <a href="#colors" className="hover:text-primary">Couleurs</a>
-            <a href="#typo" className="hover:text-primary">Typographie</a>
-            <a href="#components" className="hover:text-primary">Composants</a>
-            <a href="#patterns" className="hover:text-primary">Patterns</a>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (email) setSent(true);
+      }}
+      style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          background: dark ? C.cardDark : "#fff",
+          border: `1.5px solid ${dark ? C.borderDark : C.dark}`,
+          borderRadius: 8,
+          padding: 6,
+        }}
+      >
+        <input
+          type="email"
+          required
+          placeholder="vous@exemple.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{
+            flex: "1 1 200px",
+            minWidth: 0,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            padding: "12px 14px",
+            fontFamily: fontSans,
+            fontSize: 15,
+            color: dark ? C.cream : C.text,
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            background: dark ? C.cream : C.dark,
+            color: dark ? C.dark : C.cream,
+            border: "none",
+            borderRadius: 6,
+            padding: "12px 20px",
+            fontFamily: fontSans,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            transition: "opacity 0.2s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+        >
+          {sent ? "✓ Merci !" : ctaLabel}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/* ───────── Store badges ───────── */
+function StoreBadges() {
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <a
+        href={PLAY_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 16px",
+          background: C.dark,
+          color: C.cream,
+          borderRadius: 8,
+          textDecoration: "none",
+          fontFamily: fontSans,
+          minWidth: 170,
+          transition: "transform 0.2s",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3.6 2.3c-.4.4-.6 1-.6 1.7v16c0 .7.2 1.3.6 1.7L13 12 3.6 2.3zM14.4 12.7l2.4 2.4-11 6.4c-.4.2-.8.2-1.2 0l9.8-8.8zM20.6 10.6c.7.4 1.1 1 1.1 1.7s-.4 1.3-1.1 1.7l-2.7 1.6-2.8-2.8 2.8-2.8 2.7.6zM5.6 2.5l11 6.4-2.4 2.4L4.4 2.5c.4-.2.8-.2 1.2 0z"/></svg>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+          <span style={{ fontSize: 10, opacity: 0.7 }}>DISPONIBLE SUR</span>
+          <span style={{ fontSize: 15, fontWeight: 600 }}>Google Play</span>
+        </div>
+      </a>
+      <div
+        title="Bientôt disponible"
+        aria-disabled="true"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 16px",
+          background: "transparent",
+          color: C.textMuted,
+          border: `1.5px dashed ${C.textFaint}`,
+          borderRadius: 8,
+          fontFamily: fontSans,
+          minWidth: 170,
+          cursor: "not-allowed",
+          opacity: 0.7,
+        }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 12.5c0-2.4 2-3.6 2.1-3.6-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.9-1.6 0-3.2 1-4 2.5-1.7 3-.4 7.4 1.3 9.8.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.7-1.1-2.7-4zM15 4.8c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.1 }}>
+          <span style={{ fontSize: 10, opacity: 0.8 }}>BIENTÔT SUR</span>
+          <span style={{ fontSize: 15, fontWeight: 600 }}>App Store</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── Page ───────── */
+function LabinaLanding() {
+  const [members, setMembers] = useState(2000);
+  const animatedCount = useAnimatedNumber(CURRENT_MEMBERS);
+  const showCounter = CURRENT_MEMBERS >= MEMBER_THRESHOLD;
+
+  const contribution = useMemo(() => Math.ceil(PROJECT_GOAL / members), [members]);
+  const emoji =
+    members < 2000 ? "📐" : members < 5000 ? "🧱" : members < 8000 ? "🏗️" : "🏛️";
+
+  return (
+    <div
+      style={{
+        background: C.cream,
+        color: C.text,
+        fontFamily: fontSans,
+        minHeight: "100vh",
+        WebkitFontSmoothing: "antialiased",
+      }}
+    >
+      <style>{`
+        html { scroll-behavior: smooth; }
+        .labina-h1 { font-family: ${fontDisplay}; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
+        .labina-h2 { font-family: ${fontDisplay}; font-weight: 600; letter-spacing: -0.015em; line-height: 1.1; }
+        .labina-num { font-variant-numeric: tabular-nums; font-family: ${fontMono}; }
+        @keyframes labinaPulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.6); opacity: 0.5; }
+        }
+        .labina-pulse-dot::after {
+          content: ''; position: absolute; inset: 0; border-radius: 50%;
+          background: ${C.green}; animation: labinaPulse 2s ease-in-out infinite;
+        }
+        .labina-slider { -webkit-appearance: none; width: 100%; height: 6px;
+          border-radius: 3px; background: ${C.borderDark}; outline: none; cursor: pointer; }
+        .labina-slider::-webkit-slider-thumb { -webkit-appearance: none;
+          width: 22px; height: 22px; border-radius: 50%; background: ${C.cream};
+          border: 2px solid ${C.dark}; cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .labina-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%;
+          background: ${C.cream}; border: 2px solid ${C.dark}; cursor: pointer; }
+        .labina-nav-link { color: ${C.textSec}; text-decoration: none; font-size: 14px;
+          font-weight: 500; transition: color 0.2s; }
+        .labina-nav-link:hover { color: ${C.text}; }
+        .labina-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+        .labina-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        @media (max-width: 768px) {
+          .labina-grid-2 { grid-template-columns: 1fr; }
+          .labina-steps { grid-template-columns: 1fr; gap: 16px; }
+          .labina-nav-links { display: none !important; }
+          .labina-h1 { font-size: 44px !important; }
+        }
+      `}</style>
+
+      {/* NAV */}
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 30,
+          background: C.cream,
+          borderBottom: `1px solid ${C.dark}`,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1280,
+            margin: "0 auto",
+            padding: "18px 32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <a href="#top" style={{ display: "flex", alignItems: "baseline", gap: 10, textDecoration: "none", color: C.text }}>
+            <span className="labina-h2" style={{ fontSize: 26, fontWeight: 700 }}>labina</span>
+            <span style={{ fontFamily: fontArabic, fontSize: 22, color: C.textSec }}>لبنة</span>
+          </a>
+          <nav className="labina-nav-links" style={{ display: "flex", gap: 32 }}>
+            <a href="#how" className="labina-nav-link">Comment ça marche</a>
+            <a href="#assoc" className="labina-nav-link">Pour les associations</a>
+            <a href="#projects" className="labina-nav-link">Nos projets</a>
           </nav>
-          <Button variant="pill" size="sm">Se connecter</Button>
+          <a
+            href="#join"
+            style={{
+              background: C.dark,
+              color: C.cream,
+              padding: "10px 18px",
+              borderRadius: 6,
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            Créer un compte
+          </a>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="mx-auto max-w-6xl px-6 py-24 text-navy-foreground">
-          <Badge className="mb-6 bg-white/10 text-navy-foreground hover:bg-white/15">v1.0 · Inspiré de doctolib.fr</Badge>
-          <h1 className="max-w-3xl text-5xl font-semibold leading-tight tracking-tight md:text-6xl">
-            Vivez en meilleure santé
+      {/* HERO */}
+      <section id="top" className="labina-grid-2" style={{ borderBottom: `1px solid ${C.dark}` }}>
+        {/* LEFT */}
+        <div
+          id="join"
+          style={{
+            background: C.cream,
+            padding: "80px 56px",
+            borderRight: `1px solid ${C.dark}`,
+            display: "flex",
+            flexDirection: "column",
+            gap: 28,
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              alignSelf: "flex-start",
+              padding: "7px 14px",
+              border: `1.5px solid ${C.dark}`,
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 500,
+              color: C.textSec,
+            }}
+          >
+            <span style={{ fontFamily: fontArabic, color: C.text }}>لبنة</span>
+            <span>· La pierre qu'on apporte à l'édifice</span>
+          </div>
+
+          <h1 className="labina-h1" style={{ fontSize: 64, color: C.text, margin: 0 }}>
+            Apportez votre pierre à l'édifice.
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-navy-foreground/80">
-            Un système de design clair, accessible et chaleureux pour les expériences de santé.
+
+          <p
+            className="labina-h2"
+            style={{ fontSize: 26, color: C.textSec, margin: 0, fontWeight: 400, fontStyle: "italic" }}
+          >
+            Plus on est nombreux, moins chacun{" "}
+            <span style={{ color: C.green, fontWeight: 600, fontStyle: "normal" }}>contribue</span>.
           </p>
 
-          {/* Search bar pattern */}
-          <div className="mt-10 flex max-w-3xl flex-col gap-2 rounded-full bg-background p-2 shadow-[var(--shadow-elevated)] md:flex-row md:items-center">
-            <div className="flex flex-1 items-center gap-2 px-4">
-              <Search className="h-5 w-5 text-muted-foreground" />
-              <Input className="border-0 shadow-none focus-visible:ring-0" placeholder="Nom, spécialité, établissement…" />
+          <p style={{ fontSize: 16, lineHeight: 1.6, color: C.textSec, margin: 0, maxWidth: 520 }}>
+            Labina réunit la communauté pour financer ensemble des mosquées, écoles
+            coraniques et projets humanitaires. Chaque nouveau membre réduit la part de tous.
+          </p>
+
+          {/* Counter */}
+          {showCounter ? (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "12px 18px",
+                background: "#fff",
+                border: `1.5px solid ${C.dark}`,
+                borderRadius: 8,
+                alignSelf: "flex-start",
+              }}
+            >
+              <span style={{ position: "relative", width: 10, height: 10, borderRadius: "50%", background: C.green }}>
+                <span className="labina-pulse-dot" />
+              </span>
+              <span className="labina-num" style={{ fontSize: 22, fontWeight: 600, color: C.text }}>
+                {animatedCount.toLocaleString("fr-FR")}
+              </span>
+              <span style={{ fontSize: 13, color: C.textSec }}>membres déjà inscrits</span>
             </div>
-            <div className="hidden h-8 w-px bg-border md:block" />
-            <div className="flex flex-1 items-center gap-2 px-4">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <Input className="border-0 shadow-none focus-visible:ring-0" placeholder="Où ?" />
-            </div>
-            <Button variant="pill" size="lg" className="px-8">Rechercher</Button>
+          ) : (
+            <p style={{ fontSize: 14, color: C.textMuted, margin: 0, fontStyle: "italic" }}>
+              Soyez parmi les premiers à bâtir quelque chose de grand.
+            </p>
+          )}
+
+          <EmailForm ctaLabel="Rejoindre Labina — c'est gratuit" />
+          <p style={{ fontSize: 12, color: C.textMuted, margin: "-12px 0 0" }}>
+            Aucune contribution demandée à l'inscription
+          </p>
+
+          {/* Separator */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "8px 0" }}>
+            <div style={{ flex: 1, height: 1, background: C.textFaint }} />
+            <span style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              ou téléchargez l'application
+            </span>
+            <div style={{ flex: 1, height: 1, background: C.textFaint }} />
           </div>
+
+          <StoreBadges />
         </div>
-        <div className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-primary/30 blur-3xl" />
-      </section>
 
-      <main className="mx-auto max-w-6xl space-y-24 px-6 py-20">
-        {/* Colors */}
-        <section id="colors">
-          <SectionHeader eyebrow="01 — Fondations" title="Palette de couleurs" subtitle="Tons inspirés de l'identité Doctolib : un bleu confiance, une marine profonde, et des accents doux." />
-          <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {colorTokens.map((c) => (
-              <Card key={c.name} className="overflow-hidden p-0">
-                <div className={`h-24 ${c.className}`} />
-                <div className="space-y-1 p-4">
-                  <div className="text-sm font-medium">{c.label}</div>
-                  <code className="text-xs text-muted-foreground">--{c.name}</code>
-                </div>
-              </Card>
-            ))}
+        {/* RIGHT */}
+        <div
+          style={{
+            background: C.dark,
+            color: C.cream,
+            padding: "80px 56px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 36,
+          }}
+        >
+          {/* Brick wall block */}
+          <div>
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: C.textFaint,
+                marginBottom: 18,
+              }}
+            >
+              Chaque membre = une brique
+            </div>
+            <BrickWall members={members} />
           </div>
-        </section>
 
-        {/* Typography */}
-        <section id="typo">
-          <SectionHeader eyebrow="02 — Fondations" title="Typographie" subtitle="Inter, claire et lisible. Hiérarchie nette pour guider le patient." />
-          <Card className="mt-10 space-y-6 p-10">
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Display · 60/64 · semibold</div>
-              <p className="mt-2 text-6xl font-semibold tracking-tight text-navy">Vivez en meilleure santé</p>
+          <div style={{ height: 1, background: C.borderDark }} />
+
+          {/* Simulator */}
+          <div>
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: C.textFaint,
+                marginBottom: 14,
+              }}
+            >
+              Simulateur collectif
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">H1 · 36 · semibold</div>
-              <p className="mt-2 text-4xl font-semibold text-navy">Prenez rendez-vous facilement</p>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">H2 · 24 · medium</div>
-              <p className="mt-2 text-2xl font-medium text-navy">Votre compagnon de santé au quotidien</p>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Body · 16 · regular</div>
-              <p className="mt-2 max-w-2xl text-base text-foreground/80">
-                Réservez des consultations vidéo ou en présentiel, et recevez des rappels pour ne jamais les manquer.
+
+            <div
+              style={{
+                background: C.cardDark,
+                border: `1px solid ${C.borderDark}`,
+                borderRadius: 10,
+                padding: 22,
+              }}
+            >
+              <div style={{ fontSize: 14, color: C.cream, fontWeight: 600 }}>
+                Mosquée Al-Nour — Paris 18ᵉ
+              </div>
+              <div style={{ fontSize: 12, color: C.textFaint, marginTop: 4 }}>
+                Objectif : <span className="labina-num">200 000 €</span>
+              </div>
+
+              <div style={{ marginTop: 26, display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.textFaint }}>
+                  <span>Nombre de membres</span>
+                  <span className="labina-num" style={{ color: C.cream, fontWeight: 600 }}>
+                    {members.toLocaleString("fr-FR")}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={100}
+                  max={10000}
+                  step={100}
+                  value={members}
+                  onChange={(e) => setMembers(Number(e.target.value))}
+                  className="labina-slider"
+                />
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: C.textMuted }}>
+                  <span>100</span>
+                  <span>10 000</span>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 26,
+                  paddingTop: 22,
+                  borderTop: `1px solid ${C.borderDark}`,
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 12, color: C.textFaint }}>Votre contribution serait de</div>
+                  <div className="labina-num" style={{ fontSize: 44, fontWeight: 600, color: C.cream, marginTop: 6 }}>
+                    {contribution.toLocaleString("fr-FR")} €
+                  </div>
+                  <div className="labina-num" style={{ fontSize: 12, color: C.gold, marginTop: 6 }}>
+                    200 000 € ÷ {members.toLocaleString("fr-FR")} membres
+                  </div>
+                </div>
+                <div style={{ fontSize: 56, lineHeight: 1 }}>{emoji}</div>
+              </div>
+
+              <p style={{ fontStyle: "italic", fontSize: 12, color: C.textFaint, marginTop: 18 }}>
+                Si vous rejoignez maintenant, votre part ne peut que diminuer.
               </p>
             </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Caption · 13 · medium</div>
-              <p className="mt-2 text-[13px] font-medium text-muted-foreground">Confidentialité · Données chiffrées de bout en bout</p>
-            </div>
-          </Card>
-        </section>
-
-        {/* Buttons & Inputs */}
-        <section id="components">
-          <SectionHeader eyebrow="03 — Composants" title="Boutons & champs" subtitle="Pills arrondies, ombres douces, focus accessibles." />
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <Card className="space-y-5 p-8">
-              <div className="text-sm font-medium text-muted-foreground">Boutons</div>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="pill">Rechercher</Button>
-                <Button variant="navy">Espace praticien</Button>
-                <Button variant="soft">Centre d'aide</Button>
-                <Button variant="outline" className="rounded-full">Découvrir</Button>
-                <Button variant="ghost" className="rounded-full">En savoir plus</Button>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="pill" size="xl">Prendre rendez-vous</Button>
-              </div>
-            </Card>
-            <Card className="space-y-5 p-8">
-              <div className="text-sm font-medium text-muted-foreground">Champs</div>
-              <Input placeholder="Email professionnel" className="h-12 rounded-full px-5" />
-              <div className="flex items-center gap-2 rounded-full border border-input bg-background px-5">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input className="h-12 border-0 px-0 shadow-none focus-visible:ring-0" placeholder="Médecin généraliste…" />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-primary-soft text-primary hover:bg-primary-soft">Téléconsultation</Badge>
-                <Badge className="bg-primary-soft text-primary hover:bg-primary-soft">Disponible aujourd'hui</Badge>
-                <Badge variant="outline">Conventionné secteur 1</Badge>
-              </div>
-            </Card>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Feature cards pattern */}
-        <section id="patterns">
-          <SectionHeader eyebrow="04 — Patterns" title="Cartes de fonctionnalités" subtitle="Icône colorée + titre + description courte. Le motif clé du site Doctolib." />
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+      {/* HOW IT WORKS */}
+      <section id="how" style={{ background: C.cream, padding: "100px 32px", borderBottom: `1px solid ${C.dark}` }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+          <div style={{ maxWidth: 640, marginBottom: 56 }}>
+            <div style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 14 }}>
+              Comment ça marche
+            </div>
+            <h2 className="labina-h2" style={{ fontSize: 44, color: C.text, margin: 0 }}>
+              Quatre étapes pour bâtir ensemble.
+            </h2>
+          </div>
+
+          <div className="labina-steps">
             {[
-              { icon: Calendar, title: "Accédez aux soins", desc: "Réservez des consultations vidéo ou en présentiel et recevez des rappels." },
-              { icon: MessageCircle, title: "Soins personnalisés", desc: "Échangez avec vos soignants par message et obtenez des conseils." },
-              { icon: Heart, title: "Gérez votre santé", desc: "Centralisez vos informations et celles de vos proches en toute sécurité." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="p-8 transition-all hover:shadow-[var(--shadow-elevated)]">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary">
-                  <Icon className="h-7 w-7" />
-                </div>
-                <h3 className="mt-6 text-xl font-semibold text-navy">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
-              </Card>
+              { n: "01", t: "Créez un compte", d: "Email seulement, gratuit, en 30 secondes." },
+              { n: "02", t: "Explorez les projets", d: "Mosquées, écoles, puits, orphelinats…" },
+              { n: "03", t: "Votre part se calcule", d: "Montant du projet ÷ nombre de membres inscrits." },
+              { n: "04", t: "Vous contribuez", d: "Reçu fiscal, suivi photos du chantier, transparence totale." },
+            ].map((s) => (
+              <div
+                key={s.n}
+                style={{
+                  borderTop: `1.5px solid ${C.dark}`,
+                  paddingTop: 22,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                <div className="labina-num" style={{ fontSize: 13, color: C.textMuted, fontWeight: 500 }}>{s.n}</div>
+                <h3 className="labina-h2" style={{ fontSize: 22, color: C.text, margin: 0 }}>{s.t}</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.55, color: C.textSec, margin: 0 }}>{s.d}</p>
+              </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Appointment card */}
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <Card className="overflow-hidden p-0">
-              <div className="flex items-start gap-4 p-6">
-                <div className="h-16 w-16 shrink-0 rounded-full bg-primary-soft" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-navy">Dr. Camille Laurent</h4>
-                      <p className="text-sm text-muted-foreground">Médecin généraliste · Paris 11ᵉ</p>
-                    </div>
-                    <Badge className="bg-success/15 text-success hover:bg-success/15">Dispo</Badge>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {["09:30", "10:15", "11:00", "14:30", "16:00"].map((t) => (
-                      <button key={t} className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary-soft">{t}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="bg-navy p-6 text-navy-foreground">
-              <Video className="h-8 w-8 text-primary-foreground" />
-              <h4 className="mt-4 text-lg font-semibold">Téléconsultation sécurisée</h4>
-              <p className="mt-2 text-sm text-navy-foreground/75">Consultez un soignant en vidéo, où que vous soyez, en toute confidentialité.</p>
-              <Button variant="pill" className="mt-6 bg-background text-primary hover:brightness-95">Lancer une consultation</Button>
-            </Card>
+      {/* FOOTER CTA */}
+      <section style={{ background: C.dark, color: C.cream, padding: "100px 32px" }}>
+        <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center", display: "flex", flexDirection: "column", gap: 28, alignItems: "center" }}>
+          <span style={{ fontFamily: fontArabic, fontSize: 28, color: C.gold }}>لبنة</span>
+          <h2 className="labina-h2" style={{ fontSize: 48, color: C.cream, margin: 0 }}>
+            Prêt à apporter votre pierre ?
+          </h2>
+          <p style={{ fontSize: 16, color: C.textFaint, margin: 0, maxWidth: 480 }}>
+            Rejoignez la communauté Labina et découvrez les premiers projets dès leur ouverture.
+          </p>
+          <div style={{ width: "100%", maxWidth: 460 }}>
+            <EmailForm dark ctaLabel="Je rejoins Labina" />
           </div>
+        </div>
+      </section>
 
-          {/* Alert / utility row */}
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            <Card className="flex items-start gap-3 p-5">
-              <Bell className="mt-0.5 h-5 w-5 text-primary" />
-              <div>
-                <div className="text-sm font-medium text-navy">Rappel automatique</div>
-                <div className="text-xs text-muted-foreground">SMS 24h avant votre rendez-vous</div>
-              </div>
-            </Card>
-            <Card className="flex items-start gap-3 p-5">
-              <ShieldCheck className="mt-0.5 h-5 w-5 text-success" />
-              <div>
-                <div className="text-sm font-medium text-navy">Données protégées</div>
-                <div className="text-xs text-muted-foreground">Hébergement HDS certifié</div>
-              </div>
-            </Card>
-            <Card className="flex items-start gap-3 p-5">
-              <Heart className="mt-0.5 h-5 w-5 text-destructive" />
-              <div>
-                <div className="text-sm font-medium text-navy">Suivi familial</div>
-                <div className="text-xs text-muted-foreground">Gérez les RDV de vos proches</div>
-              </div>
-            </Card>
+      {/* FOOTER */}
+      <footer style={{ background: C.dark, color: C.textFaint, padding: "32px", borderTop: `1px solid ${C.borderDark}` }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+            <span className="labina-h2" style={{ fontSize: 20, color: C.cream, fontWeight: 700 }}>labina</span>
+            <span style={{ fontFamily: fontArabic, fontSize: 16 }}>لبنة</span>
           </div>
-        </section>
-
-        {/* Spacing & radius */}
-        <section>
-          <SectionHeader eyebrow="05 — Fondations" title="Rayons & ombres" subtitle="Coins doux et ombres légères pour une sensation chaleureuse." />
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            <Card className="flex flex-col items-center gap-3 p-8">
-              <div className="h-20 w-20 rounded-md bg-primary-soft" />
-              <code className="text-xs text-muted-foreground">radius-md</code>
-            </Card>
-            <Card className="flex flex-col items-center gap-3 p-8">
-              <div className="h-20 w-20 rounded-2xl bg-primary-soft" />
-              <code className="text-xs text-muted-foreground">radius-2xl</code>
-            </Card>
-            <Card className="flex flex-col items-center gap-3 p-8">
-              <div className="h-20 w-20 rounded-full bg-primary-soft" />
-              <code className="text-xs text-muted-foreground">radius-full</code>
-            </Card>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-border bg-background">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted-foreground md:flex-row">
-          <Logo />
-          <p>Design system non officiel · Inspiré de doctolib.fr</p>
+          <p style={{ fontSize: 12, margin: 0 }}>© 2026 Labina · Solidarité · Transparence · Oumma</p>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
-  return (
-    <div className="max-w-2xl">
-      <div className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</div>
-      <h2 className="mt-2 text-3xl font-semibold tracking-tight text-navy md:text-4xl">{title}</h2>
-      <p className="mt-3 text-base text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
