@@ -9,8 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as HowRouteImport } from './routes/how'
+import { Route as AssociationsRouteImport } from './routes/associations'
 import { Route as IndexRouteImport } from './routes/index'
 
+const HowRoute = HowRouteImport.update({
+  id: '/how',
+  path: '/how',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssociationsRoute = AssociationsRouteImport.update({
+  id: '/associations',
+  path: '/associations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +31,50 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/associations' | '/how'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/associations' | '/how'
+  id: '__root__' | '/' | '/associations' | '/how'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssociationsRoute: typeof AssociationsRoute
+  HowRoute: typeof HowRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/how': {
+      id: '/how'
+      path: '/how'
+      fullPath: '/how'
+      preLoaderRoute: typeof HowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/associations': {
+      id: '/associations'
+      path: '/associations'
+      fullPath: '/associations'
+      preLoaderRoute: typeof AssociationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,7 +87,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssociationsRoute: AssociationsRoute,
+  HowRoute: HowRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
