@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as HowRouteImport } from './routes/how'
+import { Route as AssociationsRouteImport } from './routes/associations'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowRoute = HowRouteImport.update({
+  id: '/how',
+  path: '/how',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssociationsRoute = AssociationsRouteImport.update({
+  id: '/associations',
+  path: '/associations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
+  '/projects': typeof ProjectsRoute
+  '/signup': typeof SignupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
+  '/projects': typeof ProjectsRoute
+  '/signup': typeof SignupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/associations': typeof AssociationsRoute
+  '/how': typeof HowRoute
+  '/projects': typeof ProjectsRoute
+  '/signup': typeof SignupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/associations' | '/how' | '/projects' | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/associations' | '/how' | '/projects' | '/signup'
+  id: '__root__' | '/' | '/associations' | '/how' | '/projects' | '/signup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssociationsRoute: typeof AssociationsRoute
+  HowRoute: typeof HowRoute
+  ProjectsRoute: typeof ProjectsRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how': {
+      id: '/how'
+      path: '/how'
+      fullPath: '/how'
+      preLoaderRoute: typeof HowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/associations': {
+      id: '/associations'
+      path: '/associations'
+      fullPath: '/associations'
+      preLoaderRoute: typeof AssociationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +121,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssociationsRoute: AssociationsRoute,
+  HowRoute: HowRoute,
+  ProjectsRoute: ProjectsRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
