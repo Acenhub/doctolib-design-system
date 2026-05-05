@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { LabinaShell } from "@/components/labina/Layout";
+import { useLabinaTheme, fontArabic, fontDisplay, fontMono, fontSans, type Palette } from "@/components/labina/theme";
 
 export const Route = createFileRoute("/")({
   component: LabinaLanding,
@@ -24,46 +26,6 @@ const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.labina
 const MEMBER_THRESHOLD = 500;
 const CURRENT_MEMBERS = 312; // demo value, masked under threshold
 const PROJECT_GOAL = 200_000;
-
-type Palette = {
-  cream: string; dark: string; cardDark: string; borderDark: string;
-  gold: string; green: string; text: string; textSec: string;
-  textMuted: string; textFaint: string;
-};
-
-const PALETTES: Record<string, { name: string; colors: Palette }> = {
-  emeraude: {
-    name: "Terre & Émeraude",
-    colors: {
-      cream: "#faf8f4", dark: "#1a1614", cardDark: "#2c2820", borderDark: "#3d3530",
-      gold: "#c9a96e", green: "#0f7a5a",
-      text: "#1a1614", textSec: "#5a4e38", textMuted: "#8a7a60", textFaint: "#b8a88a",
-    },
-  },
-  doctolib: {
-    name: "Bleu Doctolib + Doré",
-    colors: {
-      cream: "#faf8f4", dark: "#1a2942", cardDark: "#243352", borderDark: "#34456a",
-      gold: "#c9a96e", green: "#107aca",
-      text: "#1a2942", textSec: "#3d4e6e", textMuted: "#7a89a3", textFaint: "#b3c0d4",
-    },
-  },
-  sauge: {
-    name: "Sauge & Argile",
-    colors: {
-      cream: "#f5f1e8", dark: "#2a3d35", cardDark: "#34493f", borderDark: "#4a5e54",
-      gold: "#d4c4a0", green: "#c47a5a",
-      text: "#2a3d35", textSec: "#5a6f64", textMuted: "#7a9181", textFaint: "#aab8af",
-    },
-  },
-};
-
-let C: Palette = PALETTES.emeraude.colors;
-
-const fontDisplay = "'Playfair Display', Georgia, serif";
-const fontSans = "'DM Sans', system-ui, sans-serif";
-const fontMono = "'DM Mono', ui-monospace, monospace";
-const fontArabic = "'Noto Sans Arabic', sans-serif";
 
 /* ───────── Mosque builder ─────────
  * Briques posées de bas en haut + apparition progressive des éléments
