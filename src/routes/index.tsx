@@ -25,18 +25,40 @@ const MEMBER_THRESHOLD = 500;
 const CURRENT_MEMBERS = 312; // demo value, masked under threshold
 const PROJECT_GOAL = 200_000;
 
-const C = {
-  cream: "#faf8f4",
-  dark: "#1a1614",
-  cardDark: "#2c2820",
-  borderDark: "#3d3530",
-  gold: "#c9a96e",
-  green: "#2d6a4f",
-  text: "#1a1614",
-  textSec: "#5a4e38",
-  textMuted: "#8a7a60",
-  textFaint: "#b8a88a",
+type Palette = {
+  cream: string; dark: string; cardDark: string; borderDark: string;
+  gold: string; green: string; text: string; textSec: string;
+  textMuted: string; textFaint: string;
 };
+
+const PALETTES: Record<string, { name: string; colors: Palette }> = {
+  emeraude: {
+    name: "Terre & Émeraude",
+    colors: {
+      cream: "#faf8f4", dark: "#1a1614", cardDark: "#2c2820", borderDark: "#3d3530",
+      gold: "#c9a96e", green: "#0f7a5a",
+      text: "#1a1614", textSec: "#5a4e38", textMuted: "#8a7a60", textFaint: "#b8a88a",
+    },
+  },
+  doctolib: {
+    name: "Bleu Doctolib + Doré",
+    colors: {
+      cream: "#faf8f4", dark: "#1a2942", cardDark: "#243352", borderDark: "#34456a",
+      gold: "#c9a96e", green: "#107aca",
+      text: "#1a2942", textSec: "#3d4e6e", textMuted: "#7a89a3", textFaint: "#b3c0d4",
+    },
+  },
+  sauge: {
+    name: "Sauge & Argile",
+    colors: {
+      cream: "#f5f1e8", dark: "#2a3d35", cardDark: "#34493f", borderDark: "#4a5e54",
+      gold: "#d4c4a0", green: "#c47a5a",
+      text: "#2a3d35", textSec: "#5a6f64", textMuted: "#7a9181", textFaint: "#aab8af",
+    },
+  },
+};
+
+let C: Palette = PALETTES.emeraude.colors;
 
 const fontDisplay = "'Playfair Display', Georgia, serif";
 const fontSans = "'DM Sans', system-ui, sans-serif";
@@ -455,6 +477,8 @@ function StoreBadges() {
 /* ───────── Page ───────── */
 function LabinaLanding() {
   const [members, setMembers] = useState(2000);
+  const [paletteKey, setPaletteKey] = useState<keyof typeof PALETTES>("emeraude");
+  C = PALETTES[paletteKey].colors;
   const animatedCount = useAnimatedNumber(CURRENT_MEMBERS);
   const showCounter = CURRENT_MEMBERS >= MEMBER_THRESHOLD;
 
@@ -505,6 +529,46 @@ function LabinaLanding() {
           .labina-h1 { font-size: 44px !important; }
         }
       `}</style>
+
+      {/* PALETTE SWITCHER (preview) */}
+      <div
+        style={{
+          position: "fixed", bottom: 20, right: 20, zIndex: 100,
+          background: C.cream, border: `1.5px solid ${C.dark}`, borderRadius: 12,
+          padding: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          fontFamily: fontSans, minWidth: 220,
+        }}
+      >
+        <div style={{ fontSize: 11, fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+          Palette (aperçu)
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {(Object.keys(PALETTES) as Array<keyof typeof PALETTES>).map((k) => {
+            const pal = PALETTES[k];
+            const active = k === paletteKey;
+            return (
+              <button
+                key={k}
+                onClick={() => setPaletteKey(k)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+                  border: `1.5px solid ${active ? C.dark : "transparent"}`,
+                  background: active ? C.cream : "transparent",
+                  fontFamily: fontSans, fontSize: 13, color: C.text, textAlign: "left",
+                }}
+              >
+                <div style={{ display: "flex", gap: 2 }}>
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.dark, border: `1px solid ${pal.colors.borderDark}` }} />
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.gold }} />
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.green }} />
+                </div>
+                <span style={{ fontWeight: active ? 600 : 500 }}>{pal.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* NAV */}
       <header
