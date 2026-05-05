@@ -43,38 +43,270 @@ const fontSans = "'DM Sans', system-ui, sans-serif";
 const fontMono = "'DM Mono', ui-monospace, monospace";
 const fontArabic = "'Noto Sans Arabic', sans-serif";
 
-/* ───────── Brick wall ───────── */
-function BrickWall({ members, rows = 10, cols = 5 }: { members: number; rows?: number; cols?: number }) {
-  const max = rows * cols;
-  const lit = Math.min(max, Math.floor((members / 10000) * max));
+/* ───────── Mosque builder ─────────
+ * Briques posées de bas en haut + apparition progressive des éléments
+ * (porte, dômes latéraux, dôme central, minaret, croissant) selon le slider.
+ */
+function MosqueBuilder({ members }: { members: number }) {
+  // 0 → 1 progression
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+
+  // Briques : 6 rangées × 9 colonnes = 54, posées de la rangée du bas vers le haut
+  const ROWS = 6;
+  const COLS = 9;
+  const TOTAL = ROWS * COLS;
+  // Les briques occupent ~70% de la progression, le reste pour les éléments architecturaux
+  const brickProgress = Math.min(1, p / 0.7);
+  const litBricks = Math.floor(brickProgress * TOTAL);
+
+  // Seuils d'apparition des éléments (de bas en haut)
+  const showDoor = p > 0.35;
+  const showWindows = p > 0.55;
+  const showSideDomes = p > 0.7;
+  const showMainDome = p > 0.82;
+  const showMinaret = p > 0.9;
+  const showCrescent = p > 0.96;
+
+  // Géométrie SVG
+  const W = 360;
+  const H = 280;
+  const baseY = 250; // sol
+  const wallTop = 130;
+  const wallH = baseY - wallTop; // 120
+  const wallW = 220;
+  const wallX = (W - wallW) / 2; // 70
+  const brickW = wallW / COLS;
+  const brickH = wallH / ROWS;
+
+  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      {Array.from({ length: rows }, (_, r) => (
-        <div
-          key={r}
-          style={{ display: "flex", gap: 5, marginLeft: r % 2 === 1 ? 22 : 0 }}
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      width="100%"
+      style={{ display: "block", overflow: "visible" }}
+      aria-label="Mosquée en construction"
+    >
+      {/* Sol / fondations */}
+      <rect
+        x={wallX - 16}
+        y={baseY}
+        width={wallW + 32}
+        height={6}
+        fill={C.gold}
+        opacity={0.9}
+      />
+      <rect
+        x={wallX - 24}
+        y={baseY + 6}
+        width={wallW + 48}
+        height={4}
+        fill={C.borderDark}
+      />
+
+      {/* Briques (bas → haut) */}
+      {Array.from({ length: ROWS }).map((_, rFromTop) => {
+        // r = 0 = rangée du HAUT du mur. On veut que la rangée du BAS (r = ROWS-1) s'allume EN PREMIER.
+        const rFromBottom = ROWS - 1 - rFromTop;
+        const yRow = wallTop + rFromTop * brickH;
+        const offset = rFromBottom % 2 === 1 ? brickW / 2 : 0;
+
+        return Array.from({ length: COLS }).map((_, c) => {
+          // Index de pose : on commence par la rangée du bas, gauche → droite
+          const poseIndex = rFromBottom * COLS + c;
+          const active = poseIndex < litBricks;
+          const x = wallX + c * brickW - offset;
+          // clip horizontal pour ne pas déborder du mur
+          const visibleW = brickW - 2;
+          if (x < wallX - brickW / 2 || x > wallX + wallW) return null;
+          return (
+            <rect
+              key={`${rFromTop}-${c}`}
+              x={x + 1}
+              y={yRow + 1}
+              width={visibleW}
+              height={brickH - 2}
+              rx={1.5}
+              fill={active ? C.gold : C.cardDark}
+              stroke={active ? C.gold : C.borderDark}
+              strokeWidth={1}
+              style={{
+                transition: `fill 0.4s ${ease}, stroke 0.4s ${ease}, transform 0.5s ${ease}, opacity 0.4s ${ease}`,
+                transformOrigin: `${x + brickW / 2}px ${yRow + brickH}px`,
+                transformBox: "fill-box",
+                transform: active ? "translateY(0) scaleY(1)" : "translateY(8px) scaleY(0.6)",
+                opacity: active ? 1 : 0.35,
+                transitionDelay: active ? `${poseIndex * 18}ms` : "0ms",
+              }}
+            />
+          );
+        });
+      })}
+
+      {/* Porte voûtée centrale */}
+      <g
+        style={{
+          transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`,
+          transformOrigin: `${W / 2}px ${baseY}px`,
+          transformBox: "fill-box",
+          opacity: showDoor ? 1 : 0,
+          transform: showDoor ? "scaleY(1)" : "scaleY(0)",
+        }}
+      >
+        <path
+          d={`M ${W / 2 - 22} ${baseY}
+              L ${W / 2 - 22} ${baseY - 38}
+              A 22 22 0 0 1 ${W / 2 + 22} ${baseY - 38}
+              L ${W / 2 + 22} ${baseY}
+              Z`}
+          fill={C.dark}
+          stroke={C.gold}
+          strokeWidth={1.5}
+        />
+      </g>
+
+      {/* Fenêtres voûtées */}
+      {showWindows &&
+        [-70, 70].map((dx) => (
+          <g
+            key={dx}
+            style={{
+              transition: `opacity 0.5s ${ease}`,
+              opacity: showWindows ? 1 : 0,
+            }}
+          >
+            <path
+              d={`M ${W / 2 + dx - 10} ${baseY - 30}
+                  L ${W / 2 + dx - 10} ${baseY - 50}
+                  A 10 10 0 0 1 ${W / 2 + dx + 10} ${baseY - 50}
+                  L ${W / 2 + dx + 10} ${baseY - 30} Z`}
+              fill={C.dark}
+              stroke={C.gold}
+              strokeWidth={1.2}
+            />
+          </g>
+        ))}
+
+      {/* Dômes latéraux */}
+      {[-85, 85].map((dx) => (
+        <g
+          key={dx}
+          style={{
+            transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`,
+            transformOrigin: `${W / 2 + dx}px ${wallTop}px`,
+            transformBox: "fill-box",
+            opacity: showSideDomes ? 1 : 0,
+            transform: showSideDomes ? "scale(1)" : "scale(0.4)",
+          }}
         >
-          {Array.from({ length: cols }, (_, c) => {
-            const idx = r * cols + c;
-            const active = idx < lit;
-            return (
-              <div
-                key={c}
-                style={{
-                  flex: 1,
-                  height: 22,
-                  background: active ? C.gold : C.cardDark,
-                  border: `1.5px solid ${active ? C.gold : C.borderDark}`,
-                  borderRadius: 3,
-                  transition: "background 0.35s ease, border-color 0.35s ease, opacity 0.35s ease",
-                  transitionDelay: active ? `${idx * 12}ms` : "0ms",
-                }}
-              />
-            );
-          })}
-        </div>
+          <path
+            d={`M ${W / 2 + dx - 18} ${wallTop}
+                Q ${W / 2 + dx} ${wallTop - 32}, ${W / 2 + dx + 18} ${wallTop} Z`}
+            fill={C.gold}
+            stroke={C.gold}
+            strokeWidth={1}
+          />
+          <rect
+            x={W / 2 + dx - 1}
+            y={wallTop - 42}
+            width={2}
+            height={12}
+            fill={C.gold}
+          />
+        </g>
       ))}
-    </div>
+
+      {/* Dôme central */}
+      <g
+        style={{
+          transition: `opacity 0.6s ${ease}, transform 0.6s ${ease}`,
+          transformOrigin: `${W / 2}px ${wallTop}px`,
+          transformBox: "fill-box",
+          opacity: showMainDome ? 1 : 0,
+          transform: showMainDome ? "scale(1)" : "scale(0.3)",
+        }}
+      >
+        {/* tambour */}
+        <rect
+          x={W / 2 - 36}
+          y={wallTop - 14}
+          width={72}
+          height={14}
+          fill={C.cardDark}
+          stroke={C.gold}
+          strokeWidth={1.2}
+        />
+        {/* coupole */}
+        <path
+          d={`M ${W / 2 - 40} ${wallTop - 14}
+              Q ${W / 2 - 40} ${wallTop - 70}, ${W / 2} ${wallTop - 70}
+              Q ${W / 2 + 40} ${wallTop - 70}, ${W / 2 + 40} ${wallTop - 14} Z`}
+          fill={C.gold}
+        />
+        {/* hampe */}
+        <rect x={W / 2 - 1} y={wallTop - 86} width={2} height={20} fill={C.gold} />
+      </g>
+
+      {/* Minaret (à droite) */}
+      <g
+        style={{
+          transition: `opacity 0.6s ${ease}, transform 0.6s ${ease}`,
+          transformOrigin: `${wallX + wallW + 8}px ${baseY}px`,
+          transformBox: "fill-box",
+          opacity: showMinaret ? 1 : 0,
+          transform: showMinaret ? "scaleY(1)" : "scaleY(0)",
+        }}
+      >
+        <rect
+          x={wallX + wallW + 4}
+          y={wallTop - 30}
+          width={18}
+          height={baseY - (wallTop - 30)}
+          fill={C.cardDark}
+          stroke={C.gold}
+          strokeWidth={1.2}
+        />
+        {/* balcon */}
+        <rect
+          x={wallX + wallW + 1}
+          y={wallTop - 20}
+          width={24}
+          height={4}
+          fill={C.gold}
+        />
+        {/* coupole minaret */}
+        <path
+          d={`M ${wallX + wallW + 4} ${wallTop - 30}
+              Q ${wallX + wallW + 13} ${wallTop - 56}, ${wallX + wallW + 22} ${wallTop - 30} Z`}
+          fill={C.gold}
+        />
+        <rect
+          x={wallX + wallW + 12}
+          y={wallTop - 68}
+          width={2}
+          height={14}
+          fill={C.gold}
+        />
+      </g>
+
+      {/* Croissant au sommet du dôme */}
+      <g
+        style={{
+          transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`,
+          transformOrigin: `${W / 2}px ${wallTop - 90}px`,
+          transformBox: "fill-box",
+          opacity: showCrescent ? 1 : 0,
+          transform: showCrescent ? "scale(1) rotate(0deg)" : "scale(0) rotate(-40deg)",
+        }}
+      >
+        <path
+          d={`M ${W / 2 - 6} ${wallTop - 92}
+              a 7 7 0 1 0 0 -2
+              a 5 5 0 1 1 0 2 Z`}
+          fill={C.gold}
+        />
+      </g>
+    </svg>
   );
 }
 
