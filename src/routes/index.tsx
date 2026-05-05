@@ -668,9 +668,9 @@ function LabinaLanding() {
                 marginBottom: 18,
               }}
             >
-              Chaque membre = une brique
+              Chaque membre pose une brique
             </div>
-            <BrickWall members={members} />
+            <MosqueBuilder members={members} />
           </div>
 
           <div style={{ height: 1, background: C.borderDark }} />
