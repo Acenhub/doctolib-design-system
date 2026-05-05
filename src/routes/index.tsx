@@ -477,6 +477,8 @@ function StoreBadges() {
 /* ───────── Page ───────── */
 function LabinaLanding() {
   const [members, setMembers] = useState(2000);
+  const [paletteKey, setPaletteKey] = useState<keyof typeof PALETTES>("emeraude");
+  C = PALETTES[paletteKey].colors;
   const animatedCount = useAnimatedNumber(CURRENT_MEMBERS);
   const showCounter = CURRENT_MEMBERS >= MEMBER_THRESHOLD;
 
@@ -527,6 +529,46 @@ function LabinaLanding() {
           .labina-h1 { font-size: 44px !important; }
         }
       `}</style>
+
+      {/* PALETTE SWITCHER (preview) */}
+      <div
+        style={{
+          position: "fixed", bottom: 20, right: 20, zIndex: 100,
+          background: C.cream, border: `1.5px solid ${C.dark}`, borderRadius: 12,
+          padding: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          fontFamily: fontSans, minWidth: 220,
+        }}
+      >
+        <div style={{ fontSize: 11, fontWeight: 600, color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+          Palette (aperçu)
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {(Object.keys(PALETTES) as Array<keyof typeof PALETTES>).map((k) => {
+            const pal = PALETTES[k];
+            const active = k === paletteKey;
+            return (
+              <button
+                key={k}
+                onClick={() => setPaletteKey(k)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "8px 10px", borderRadius: 8, cursor: "pointer",
+                  border: `1.5px solid ${active ? C.dark : "transparent"}`,
+                  background: active ? C.cream : "transparent",
+                  fontFamily: fontSans, fontSize: 13, color: C.text, textAlign: "left",
+                }}
+              >
+                <div style={{ display: "flex", gap: 2 }}>
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.dark, border: `1px solid ${pal.colors.borderDark}` }} />
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.gold }} />
+                  <span style={{ width: 14, height: 14, borderRadius: 3, background: pal.colors.green }} />
+                </div>
+                <span style={{ fontWeight: active ? 600 : 500 }}>{pal.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* NAV */}
       <header
