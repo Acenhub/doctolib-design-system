@@ -27,38 +27,22 @@ const MEMBER_THRESHOLD = 500;
 const CURRENT_MEMBERS = 312;
 const PROJECT_GOAL = 200_000;
 
-/* ───────── Mosque builder ───────── */
-function MosqueBuilder({ members, C }: { members: number; C: Palette }) {
-  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
-  const ROWS = 6;
-  const COLS = 9;
-  const TOTAL = ROWS * COLS;
-  const brickProgress = Math.min(1, p / 0.7);
-  const litBricks = Math.floor(brickProgress * TOTAL);
-
-  const showDoor = p > 0.35;
-  const showWindows = p > 0.55;
-  const showSideDomes = p > 0.7;
-  const showMainDome = p > 0.82;
-  const showMinaret = p > 0.9;
-  const showCrescent = p > 0.96;
-
-  const W = 360, H = 280, baseY = 250, wallTop = 130;
-  const wallH = baseY - wallTop, wallW = 220;
-  const wallX = (W - wallW) / 2;
-  const brickW = wallW / COLS, brickH = wallH / ROWS;
+/* ───────── Shared brick wall (bottom-up) ───────── */
+function BrickWall({
+  C, p, wallX, wallTop, wallW, wallH, rows = 6, cols = 9,
+}: { C: Palette; p: number; wallX: number; wallTop: number; wallW: number; wallH: number; rows?: number; cols?: number }) {
+  const TOTAL = rows * cols;
+  const litBricks = Math.floor(Math.min(1, p / 0.7) * TOTAL);
+  const brickW = wallW / cols, brickH = wallH / rows;
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", overflow: "visible" }} aria-label="Mosquée en construction">
-      <rect x={wallX - 16} y={baseY} width={wallW + 32} height={6} fill={C.gold} opacity={0.9} />
-      <rect x={wallX - 24} y={baseY + 6} width={wallW + 48} height={4} fill={C.borderDark} />
-      {Array.from({ length: ROWS }).map((_, rFromTop) => {
-        const rFromBottom = ROWS - 1 - rFromTop;
+    <>
+      {Array.from({ length: rows }).map((_, rFromTop) => {
+        const rFromBottom = rows - 1 - rFromTop;
         const yRow = wallTop + rFromTop * brickH;
         const offset = rFromBottom % 2 === 1 ? brickW / 2 : 0;
-        return Array.from({ length: COLS }).map((_, c) => {
-          const poseIndex = rFromBottom * COLS + c;
+        return Array.from({ length: cols }).map((_, c) => {
+          const poseIndex = rFromBottom * cols + c;
           const active = poseIndex < litBricks;
           const x = wallX + c * brickW - offset;
           if (x < wallX - brickW / 2 || x > wallX + wallW) return null;
@@ -75,12 +59,35 @@ function MosqueBuilder({ members, C }: { members: number; C: Palette }) {
                 transformBox: "fill-box",
                 transform: active ? "translateY(0) scaleY(1)" : "translateY(8px) scaleY(0.6)",
                 opacity: active ? 1 : 0.35,
-                transitionDelay: active ? `${poseIndex * 18}ms` : "0ms",
+                transitionDelay: active ? `${poseIndex * 14}ms` : "0ms",
               }}
             />
           );
         });
       })}
+    </>
+  );
+}
+
+const W = 360, H = 280, baseY = 250, wallTop = 130;
+const wallH = baseY - wallTop, wallW = 220;
+const wallX = (W - wallW) / 2;
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+/* ───────── Mosque builder ───────── */
+function MosqueBuilder({ members, C }: { members: number; C: Palette }) {
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+  const showDoor = p > 0.35;
+  const showWindows = p > 0.55;
+  const showSideDomes = p > 0.7;
+  const showMainDome = p > 0.82;
+  const showMinaret = p > 0.9;
+  const showCrescent = p > 0.96;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", overflow: "visible" }} aria-label="Mosquée en construction">
+      <rect x={wallX - 16} y={baseY} width={wallW + 32} height={6} fill={C.gold} opacity={0.9} />
+      <rect x={wallX - 24} y={baseY + 6} width={wallW + 48} height={4} fill={C.borderDark} />
+      <BrickWall C={C} p={p} wallX={wallX} wallTop={wallTop} wallW={wallW} wallH={wallH} />
       <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W / 2}px ${baseY}px`, transformBox: "fill-box", opacity: showDoor ? 1 : 0, transform: showDoor ? "scaleY(1)" : "scaleY(0)" }}>
         <path d={`M ${W/2-22} ${baseY} L ${W/2-22} ${baseY-38} A 22 22 0 0 1 ${W/2+22} ${baseY-38} L ${W/2+22} ${baseY} Z`} fill={C.dark} stroke={C.gold} strokeWidth={1.5} />
       </g>
@@ -110,6 +117,158 @@ function MosqueBuilder({ members, C }: { members: number; C: Palette }) {
         <path d={`M ${W/2-6} ${wallTop-92} a 7 7 0 1 0 0 -2 a 5 5 0 1 1 0 2 Z`} fill={C.gold} />
       </g>
     </svg>
+  );
+}
+
+/* ───────── Dar al-Qur'an (école coranique) builder ───────── */
+function SchoolBuilder({ members, C }: { members: number; C: Palette }) {
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+  const showDoor = p > 0.35;
+  const showWindows = p > 0.55;
+  const showRoof = p > 0.75;
+  const showBook = p > 0.88;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", overflow: "visible" }} aria-label="École coranique en construction">
+      <rect x={wallX - 16} y={baseY} width={wallW + 32} height={6} fill={C.gold} opacity={0.9} />
+      <rect x={wallX - 24} y={baseY + 6} width={wallW + 48} height={4} fill={C.borderDark} />
+      <BrickWall C={C} p={p} wallX={wallX} wallTop={wallTop} wallW={wallW} wallH={wallH} rows={5} cols={10} />
+      {/* roof */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W/2}px ${wallTop}px`, transformBox: "fill-box", opacity: showRoof ? 1 : 0, transform: showRoof ? "scaleY(1)" : "scaleY(0)" }}>
+        <path d={`M ${wallX-10} ${wallTop} L ${W/2} ${wallTop-46} L ${wallX+wallW+10} ${wallTop} Z`} fill={C.gold} stroke={C.gold} strokeWidth={1} />
+      </g>
+      {/* door */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W / 2}px ${baseY}px`, transformBox: "fill-box", opacity: showDoor ? 1 : 0, transform: showDoor ? "scaleY(1)" : "scaleY(0)" }}>
+        <rect x={W/2-20} y={baseY-46} width={40} height={46} fill={C.dark} stroke={C.gold} strokeWidth={1.5} />
+      </g>
+      {/* windows */}
+      {showWindows && [-65, 65].map((dx) => (
+        <rect key={dx} x={W/2+dx-14} y={baseY-44} width={28} height={28} fill={C.dark} stroke={C.gold} strokeWidth={1.2} />
+      ))}
+      {/* open Quran on top */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W/2}px ${wallTop-46}px`, transformBox: "fill-box", opacity: showBook ? 1 : 0, transform: showBook ? "scale(1)" : "scale(0)" }}>
+        <path d={`M ${W/2-22} ${wallTop-50} Q ${W/2} ${wallTop-58}, ${W/2+22} ${wallTop-50} L ${W/2+22} ${wallTop-66} Q ${W/2} ${wallTop-74}, ${W/2-22} ${wallTop-66} Z`} fill={C.cream} stroke={C.gold} strokeWidth={1.2} />
+        <line x1={W/2} y1={wallTop-72} x2={W/2} y2={wallTop-54} stroke={C.gold} strokeWidth={1} />
+      </g>
+    </svg>
+  );
+}
+
+/* ───────── Orphanage builder ───────── */
+function OrphanageBuilder({ members, C }: { members: number; C: Palette }) {
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+  const showDoor = p > 0.35;
+  const showWindows = p > 0.55;
+  const showRoof = p > 0.75;
+  const showHearts = p > 0.9;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", overflow: "visible" }} aria-label="Orphelinat en construction">
+      <rect x={wallX - 16} y={baseY} width={wallW + 32} height={6} fill={C.gold} opacity={0.9} />
+      <rect x={wallX - 24} y={baseY + 6} width={wallW + 48} height={4} fill={C.borderDark} />
+      <BrickWall C={C} p={p} wallX={wallX} wallTop={wallTop} wallW={wallW} wallH={wallH} rows={6} cols={11} />
+      {/* sloped roof + chimney */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W/2}px ${wallTop}px`, transformBox: "fill-box", opacity: showRoof ? 1 : 0, transform: showRoof ? "scaleY(1)" : "scaleY(0)" }}>
+        <path d={`M ${wallX-12} ${wallTop+2} L ${wallX+wallW/2} ${wallTop-40} L ${wallX+wallW+12} ${wallTop+2} Z`} fill={C.gold} />
+        <rect x={wallX+wallW-40} y={wallTop-44} width={14} height={26} fill={C.cardDark} stroke={C.gold} strokeWidth={1} />
+      </g>
+      {/* door */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W / 2}px ${baseY}px`, transformBox: "fill-box", opacity: showDoor ? 1 : 0, transform: showDoor ? "scaleY(1)" : "scaleY(0)" }}>
+        <rect x={W/2-18} y={baseY-42} width={36} height={42} fill={C.dark} stroke={C.gold} strokeWidth={1.5} />
+        <circle cx={W/2+10} cy={baseY-22} r={1.8} fill={C.gold} />
+      </g>
+      {/* windows row */}
+      {showWindows && [-72, -36, 36, 72].map((dx) => (
+        <g key={dx}>
+          <rect x={W/2+dx-10} y={baseY-44} width={20} height={20} fill={C.dark} stroke={C.gold} strokeWidth={1.1} />
+          <line x1={W/2+dx} y1={baseY-44} x2={W/2+dx} y2={baseY-24} stroke={C.gold} strokeWidth={0.8} />
+          <line x1={W/2+dx-10} y1={baseY-34} x2={W/2+dx+10} y2={baseY-34} stroke={C.gold} strokeWidth={0.8} />
+        </g>
+      ))}
+      {/* hearts */}
+      <g style={{ transition: `opacity 0.6s ${ease}`, opacity: showHearts ? 1 : 0 }}>
+        {[-30, 0, 30].map((dx, i) => (
+          <path key={dx} d={`M ${W/2+dx} ${wallTop-50} q -6 -8 -12 -2 q -6 8 12 18 q 18 -10 12 -18 q -6 -6 -12 2 Z`} fill={C.green} opacity={0.85 - i*0.1} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/* ───────── Well builder ───────── */
+function WellBuilder({ members, C }: { members: number; C: Palette }) {
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+  const showFrame = p > 0.55;
+  const showRoof = p > 0.7;
+  const showBucket = p > 0.82;
+  const showDrops = p > 0.92;
+  // narrower wall = circular well opening
+  const wW = 120, wX = (W - wW) / 2, wTop = baseY - 70;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", overflow: "visible" }} aria-label="Puits en construction">
+      {/* ground */}
+      <rect x={20} y={baseY+6} width={W-40} height={4} fill={C.borderDark} />
+      {/* sand mound */}
+      <ellipse cx={W/2} cy={baseY+6} rx={130} ry={10} fill={C.gold} opacity={0.5} />
+      {/* well bricks */}
+      <BrickWall C={C} p={p} wallX={wX} wallTop={wTop} wallW={wW} wallH={70} rows={4} cols={6} />
+      {/* water inside */}
+      <ellipse cx={W/2} cy={wTop+8} rx={wW/2 - 6} ry={6} fill={C.green} opacity={p > 0.3 ? 0.6 : 0} style={{ transition: `opacity 0.5s ${ease}` }} />
+      {/* frame */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W/2}px ${wTop}px`, transformBox: "fill-box", opacity: showFrame ? 1 : 0, transform: showFrame ? "scaleY(1)" : "scaleY(0)" }}>
+          <rect x={wX-2} y={wTop-60} width={4} height={60} fill={C.cardDark} stroke={C.gold} strokeWidth={0.8} />
+          <rect x={wX+wW-2} y={wTop-60} width={4} height={60} fill={C.cardDark} stroke={C.gold} strokeWidth={0.8} />
+          <rect x={wX-6} y={wTop-64} width={wW+12} height={4} fill={C.gold} />
+      </g>
+      {/* roof */}
+      <g style={{ transition: `opacity 0.5s ${ease}, transform 0.5s ${ease}`, transformOrigin: `${W/2}px ${wTop-64}px`, transformBox: "fill-box", opacity: showRoof ? 1 : 0, transform: showRoof ? "scaleY(1)" : "scaleY(0)" }}>
+        <path d={`M ${wX-14} ${wTop-64} L ${W/2} ${wTop-92} L ${wX+wW+14} ${wTop-64} Z`} fill={C.gold} />
+      </g>
+      {/* bucket + rope */}
+      <g style={{ transition: `opacity 0.5s ${ease}`, opacity: showBucket ? 1 : 0 }}>
+        <line x1={W/2} y1={wTop-60} x2={W/2} y2={wTop-22} stroke={C.cream} strokeWidth={1.2} />
+        <rect x={W/2-9} y={wTop-22} width={18} height={14} fill={C.cardDark} stroke={C.gold} strokeWidth={1} />
+      </g>
+      {/* drops */}
+      <g style={{ transition: `opacity 0.5s ${ease}`, opacity: showDrops ? 1 : 0 }}>
+        {[-22, 0, 22].map((dx, i) => (
+          <circle key={dx} cx={W/2+dx} cy={wTop-6 + i*4} r={2.4} fill={C.green} opacity={0.85} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/* ───────── Builder rotator ───────── */
+const PROJECTS = [
+  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", goal: 200_000, Builder: MosqueBuilder },
+  { key: "school", label: "Dar al-Qur'an — Lyon", goal: 120_000, Builder: SchoolBuilder },
+  { key: "orphanage", label: "Orphelinat — Mali", goal: 80_000, Builder: OrphanageBuilder },
+  { key: "well", label: "Puits d'eau potable — Niger", goal: 4_500, Builder: WellBuilder },
+] as const;
+
+function ProjectRotator({ members, C, index }: { members: number; C: Palette; index: number }) {
+  return (
+    <div style={{ position: "relative", width: "100%" }}>
+      {PROJECTS.map((proj, i) => {
+        const active = i === index;
+        const Builder = proj.Builder;
+        return (
+          <div
+            key={proj.key}
+            style={{
+              position: active ? "relative" : "absolute",
+              inset: 0,
+              opacity: active ? 1 : 0,
+              transform: active ? "translateY(0)" : "translateY(8px)",
+              transition: `opacity 0.6s ${ease}, transform 0.6s ${ease}`,
+              pointerEvents: active ? "auto" : "none",
+            }}
+            aria-hidden={!active}
+          >
+            <Builder members={members} C={C} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
