@@ -225,8 +225,7 @@ function LabinaLanding() {
         </div>
 
         <div style={{ background: C.dark, color: C.cream, padding: "44px 56px", display: "flex", flexDirection: "column", gap: 24 }}>
-          <div>
-            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textFaint, marginBottom: 18 }}>Chaque membre pose une brique</div>
+          <div style={{ marginTop: -24 }}>
             <MosqueBuilder members={members} C={C} />
           </div>
           <div style={{ height: 1, background: C.borderDark }} />
