@@ -49,9 +49,9 @@ const ThemeCtx = createContext<Ctx | null>(null);
 export function LabinaThemeProvider({ children }: { children: ReactNode }) {
   // Persisted across nav via localStorage
   const [paletteKey, setKeyState] = useState<keyof typeof PALETTES>(() => {
-    if (typeof window === "undefined") return "emeraude";
+    if (typeof window === "undefined") return "sauge";
     const saved = window.localStorage.getItem("labina-palette") as keyof typeof PALETTES | null;
-    return saved && PALETTES[saved] ? saved : "emeraude";
+    return saved && PALETTES[saved] ? saved : "sauge";
   });
   const setPaletteKey = (k: keyof typeof PALETTES) => {
     setKeyState(k);

@@ -192,13 +192,13 @@ function LabinaLanding() {
 
       {/* HERO */}
       <section id="top" className="labina-grid-2" style={{ borderBottom: `1px solid ${C.dark}` }}>
-        <div id="join" style={{ background: C.cream, padding: "80px 56px", borderRight: `1px solid ${C.dark}`, display: "flex", flexDirection: "column", gap: 28 }}>
+        <div id="join" style={{ background: C.cream, padding: "44px 56px", borderRight: `1px solid ${C.dark}`, display: "flex", flexDirection: "column", gap: 20 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, alignSelf: "flex-start", padding: "7px 14px", border: `1.5px solid ${C.dark}`, borderRadius: 999, fontSize: 12, fontWeight: 500, color: C.textSec }}>
             <span style={{ fontFamily: fontArabic, color: C.text }}>لبنة</span>
             <span>· La pierre qu'on apporte à l'édifice</span>
           </div>
-          <h1 className="labina-h1" style={{ fontSize: 64, color: C.text, margin: 0 }}>Apportez votre pierre à l'édifice.</h1>
-          <p className="labina-h2" style={{ fontSize: 26, color: C.textSec, margin: 0, fontWeight: 400, fontStyle: "italic" }}>
+          <h1 className="labina-h1" style={{ fontSize: 52, color: C.text, margin: 0 }}>Apportez votre pierre à l'édifice.</h1>
+          <p className="labina-h2" style={{ fontSize: 22, color: C.textSec, margin: 0, fontWeight: 400, fontStyle: "italic" }}>
             Plus on est nombreux, moins chacun{" "}
             <span style={{ color: C.green, fontWeight: 600, fontStyle: "normal" }}>contribue</span>.
           </p>
@@ -224,7 +224,7 @@ function LabinaLanding() {
           <StoreBadges />
         </div>
 
-        <div style={{ background: C.dark, color: C.cream, padding: "80px 56px", display: "flex", flexDirection: "column", gap: 36 }}>
+        <div style={{ background: C.dark, color: C.cream, padding: "44px 56px", display: "flex", flexDirection: "column", gap: 24 }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textFaint, marginBottom: 18 }}>Chaque membre pose une brique</div>
             <MosqueBuilder members={members} C={C} />
