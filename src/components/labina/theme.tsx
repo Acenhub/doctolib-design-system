@@ -31,6 +31,30 @@ export const PALETTES: Record<string, { name: string; colors: Palette }> = {
       text: "#2a3d35", textSec: "#5a6f64", textMuted: "#7a9181", textFaint: "#aab8af",
     },
   },
+  nuit: {
+    name: "Nuit & Or",
+    colors: {
+      cream: "#f4efe6", dark: "#13203a", cardDark: "#1c2b48", borderDark: "#2d3d5e",
+      gold: "#e0b770", green: "#3aa886",
+      text: "#13203a", textSec: "#42526e", textMuted: "#7a8aa3", textFaint: "#b6c1d4",
+    },
+  },
+  desert: {
+    name: "Désert & Olive",
+    colors: {
+      cream: "#f7f0e1", dark: "#3a3324", cardDark: "#4a4130", borderDark: "#615641",
+      gold: "#d9b365", green: "#7a8a3a",
+      text: "#3a3324", textSec: "#6a5e44", textMuted: "#8d8164", textFaint: "#b8aa86",
+    },
+  },
+  marbre: {
+    name: "Marbre & Émeraude",
+    colors: {
+      cream: "#f3f1ec", dark: "#1f2a26", cardDark: "#2a3833", borderDark: "#3d4d47",
+      gold: "#bfae7c", green: "#1f8a6b",
+      text: "#1f2a26", textSec: "#52605b", textMuted: "#828e88", textFaint: "#b3bcb6",
+    },
+  },
 };
 
 export const fontDisplay = "'Playfair Display', Georgia, serif";
