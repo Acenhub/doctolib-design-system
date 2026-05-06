@@ -330,10 +330,16 @@ export function StoreBadges() {
 function LabinaLanding() {
   const { C } = useLabinaTheme();
   const [members, setMembers] = useState(2000);
+  const [projectIdx, setProjectIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setProjectIdx((i) => (i + 1) % PROJECTS.length), 4500);
+    return () => clearInterval(id);
+  }, []);
+  const project = PROJECTS[projectIdx];
   const animatedCount = useAnimatedNumber(CURRENT_MEMBERS);
   const showCounter = CURRENT_MEMBERS >= MEMBER_THRESHOLD;
 
-  const contribution = useMemo(() => Math.ceil(PROJECT_GOAL / members), [members]);
+  const contribution = useMemo(() => Math.ceil(project.goal / members), [members, project.goal]);
   const emoji = members < 2000 ? "📐" : members < 5000 ? "🧱" : members < 8000 ? "🏗️" : "🏛️";
 
   return (
@@ -385,14 +391,30 @@ function LabinaLanding() {
 
         <div style={{ background: C.dark, color: C.cream, padding: "24px 48px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ maxWidth: 320, alignSelf: "center", width: "100%" }}>
-            <MosqueBuilder members={members} C={C} />
+            <ProjectRotator members={members} C={C} index={projectIdx} />
           </div>
           <div style={{ height: 1, background: C.borderDark }} />
           <div>
-            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textFaint, marginBottom: 14 }}>Simulateur collectif</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textFaint, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>Simulateur collectif</span>
+              <span style={{ display: "inline-flex", gap: 6 }}>
+                {PROJECTS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setProjectIdx(i)}
+                    aria-label={`Projet ${i + 1}`}
+                    style={{
+                      width: 18, height: 4, borderRadius: 2, border: "none", cursor: "pointer",
+                      background: i === projectIdx ? C.gold : C.borderDark,
+                      transition: "background 0.3s",
+                    }}
+                  />
+                ))}
+              </span>
+            </div>
             <div style={{ background: C.cardDark, border: `1px solid ${C.borderDark}`, borderRadius: 10, padding: 18 }}>
-              <div style={{ fontSize: 14, color: C.cream, fontWeight: 600 }}>Mosquée Al-Nour — Paris 18ᵉ</div>
-              <div style={{ fontSize: 12, color: C.textFaint, marginTop: 4 }}>Objectif : <span className="labina-num">200 000 €</span></div>
+              <div style={{ fontSize: 14, color: C.cream, fontWeight: 600 }}>{project.label}</div>
+              <div style={{ fontSize: 12, color: C.textFaint, marginTop: 4 }}>Objectif : <span className="labina-num">{project.goal.toLocaleString("fr-FR")} €</span></div>
               <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.textFaint }}>
                   <span>Nombre de membres</span>
@@ -407,7 +429,7 @@ function LabinaLanding() {
                 <div>
                   <div style={{ fontSize: 12, color: C.textFaint }}>Votre contribution serait de</div>
                   <div className="labina-num" style={{ fontSize: 36, fontWeight: 600, color: C.cream, marginTop: 4 }}>{contribution.toLocaleString("fr-FR")} €</div>
-                  <div className="labina-num" style={{ fontSize: 12, color: C.gold, marginTop: 6 }}>200 000 € ÷ {members.toLocaleString("fr-FR")} membres</div>
+                  <div className="labina-num" style={{ fontSize: 12, color: C.gold, marginTop: 6 }}>{project.goal.toLocaleString("fr-FR")} € ÷ {members.toLocaleString("fr-FR")} membres</div>
                 </div>
                 <div style={{ fontSize: 44, lineHeight: 1 }}>{emoji}</div>
               </div>
