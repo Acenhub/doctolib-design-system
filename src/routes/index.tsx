@@ -191,18 +191,18 @@ function LabinaLanding() {
       `}</style>
 
       {/* HERO */}
-      <section id="top" className="labina-grid-2" style={{ borderBottom: `1px solid ${C.dark}` }}>
-        <div id="join" style={{ background: C.cream, padding: "44px 56px", borderRight: `1px solid ${C.dark}`, display: "flex", flexDirection: "column", gap: 20 }}>
+      <section id="top" className="labina-grid-2 labina-hero" style={{ borderBottom: `1px solid ${C.dark}` }}>
+        <div id="join" style={{ background: C.cream, padding: "24px 48px", borderRight: `1px solid ${C.dark}`, display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, alignSelf: "flex-start", padding: "7px 14px", border: `1.5px solid ${C.dark}`, borderRadius: 999, fontSize: 12, fontWeight: 500, color: C.textSec }}>
             <span style={{ fontFamily: fontArabic, color: C.text }}>لبنة</span>
             <span>· La pierre qu'on apporte à l'édifice</span>
           </div>
-          <h1 className="labina-h1" style={{ fontSize: 52, color: C.text, margin: 0 }}>Apportez votre pierre à l'édifice.</h1>
-          <p className="labina-h2" style={{ fontSize: 22, color: C.textSec, margin: 0, fontWeight: 400, fontStyle: "italic" }}>
+          <h1 className="labina-h1" style={{ fontSize: 40, color: C.text, margin: 0 }}>Apportez votre pierre à l'édifice.</h1>
+          <p className="labina-h2" style={{ fontSize: 18, color: C.textSec, margin: 0, fontWeight: 400, fontStyle: "italic" }}>
             Plus on est nombreux, moins chacun{" "}
             <span style={{ color: C.green, fontWeight: 600, fontStyle: "normal" }}>contribue</span>.
           </p>
-          <p style={{ fontSize: 16, lineHeight: 1.6, color: C.textSec, margin: 0, maxWidth: 520 }}>
+          <p style={{ fontSize: 14, lineHeight: 1.55, color: C.textSec, margin: 0, maxWidth: 520 }}>
             Labina réunit la communauté pour financer ensemble des mosquées, écoles coraniques et projets humanitaires. Chaque nouveau membre réduit la part de tous.
           </p>
           {showCounter ? (
@@ -215,8 +215,8 @@ function LabinaLanding() {
             <p style={{ fontSize: 14, color: C.textMuted, margin: 0, fontStyle: "italic" }}>Soyez parmi les premiers à bâtir quelque chose de grand.</p>
           )}
           <EmailForm ctaLabel="Rejoindre Labina — c'est gratuit" />
-          <p style={{ fontSize: 12, color: C.textMuted, margin: "-12px 0 0" }}>Aucune contribution demandée à l'inscription</p>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "8px 0" }}>
+          <p style={{ fontSize: 12, color: C.textMuted, margin: "-8px 0 0" }}>Aucune contribution demandée à l'inscription</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "4px 0" }}>
             <div style={{ flex: 1, height: 1, background: C.textFaint }} />
             <span style={{ fontSize: 12, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.1em" }}>ou téléchargez l'application</span>
             <div style={{ flex: 1, height: 1, background: C.textFaint }} />
@@ -224,17 +224,17 @@ function LabinaLanding() {
           <StoreBadges />
         </div>
 
-        <div style={{ background: C.dark, color: C.cream, padding: "44px 56px", display: "flex", flexDirection: "column", gap: 24 }}>
-          <div style={{ marginTop: -24 }}>
+        <div style={{ background: C.dark, color: C.cream, padding: "24px 48px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ maxWidth: 320, alignSelf: "center", width: "100%" }}>
             <MosqueBuilder members={members} C={C} />
           </div>
           <div style={{ height: 1, background: C.borderDark }} />
           <div>
             <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: C.textFaint, marginBottom: 14 }}>Simulateur collectif</div>
-            <div style={{ background: C.cardDark, border: `1px solid ${C.borderDark}`, borderRadius: 10, padding: 22 }}>
+            <div style={{ background: C.cardDark, border: `1px solid ${C.borderDark}`, borderRadius: 10, padding: 18 }}>
               <div style={{ fontSize: 14, color: C.cream, fontWeight: 600 }}>Mosquée Al-Nour — Paris 18ᵉ</div>
               <div style={{ fontSize: 12, color: C.textFaint, marginTop: 4 }}>Objectif : <span className="labina-num">200 000 €</span></div>
-              <div style={{ marginTop: 26, display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.textFaint }}>
                   <span>Nombre de membres</span>
                   <span className="labina-num" style={{ color: C.cream, fontWeight: 600 }}>{members.toLocaleString("fr-FR")}</span>
@@ -244,15 +244,15 @@ function LabinaLanding() {
                   <span>100</span><span>10 000</span>
                 </div>
               </div>
-              <div style={{ marginTop: 26, paddingTop: 22, borderTop: `1px solid ${C.borderDark}`, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${C.borderDark}`, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16 }}>
                 <div>
                   <div style={{ fontSize: 12, color: C.textFaint }}>Votre contribution serait de</div>
-                  <div className="labina-num" style={{ fontSize: 44, fontWeight: 600, color: C.cream, marginTop: 6 }}>{contribution.toLocaleString("fr-FR")} €</div>
+                  <div className="labina-num" style={{ fontSize: 36, fontWeight: 600, color: C.cream, marginTop: 4 }}>{contribution.toLocaleString("fr-FR")} €</div>
                   <div className="labina-num" style={{ fontSize: 12, color: C.gold, marginTop: 6 }}>200 000 € ÷ {members.toLocaleString("fr-FR")} membres</div>
                 </div>
-                <div style={{ fontSize: 56, lineHeight: 1 }}>{emoji}</div>
+                <div style={{ fontSize: 44, lineHeight: 1 }}>{emoji}</div>
               </div>
-              <p style={{ fontStyle: "italic", fontSize: 12, color: C.textFaint, marginTop: 18 }}>Si vous rejoignez maintenant, votre part ne peut que diminuer.</p>
+              <p style={{ fontStyle: "italic", fontSize: 12, color: C.textFaint, marginTop: 12 }}>Si vous rejoignez maintenant, votre part ne peut que diminuer.</p>
             </div>
           </div>
         </div>
