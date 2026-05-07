@@ -55,6 +55,30 @@ export const PALETTES: Record<string, { name: string; colors: Palette }> = {
       text: "#1f2a26", textSec: "#52605b", textMuted: "#828e88", textFaint: "#b3bcb6",
     },
   },
+  ivoire: {
+    name: "Ivoire & Sauge claire",
+    colors: {
+      cream: "#fbf8f1", dark: "#7a8a78", cardDark: "#e8e2d4", borderDark: "#cdd2c5",
+      gold: "#d9c48a", green: "#8fb39a",
+      text: "#3d463c", textSec: "#6b7468", textMuted: "#9aa097", textFaint: "#c2c6bd",
+    },
+  },
+  brume: {
+    name: "Brume & Lin",
+    colors: {
+      cream: "#f9f6f0", dark: "#a89a82", cardDark: "#ece4d3", borderDark: "#d8cdb6",
+      gold: "#e1c98a", green: "#a7b89e",
+      text: "#4a4234", textSec: "#7a7060", textMuted: "#a39882", textFaint: "#c9c0aa",
+    },
+  },
+  perle: {
+    name: "Perle & Eucalyptus",
+    colors: {
+      cream: "#f6f8f5", dark: "#88a59a", cardDark: "#e3ece6", borderDark: "#c8d6cd",
+      gold: "#d8c891", green: "#9bbfae",
+      text: "#3a4842", textSec: "#6a7872", textMuted: "#95a39c", textFaint: "#bcc6c0",
+    },
+  },
 };
 
 export const fontDisplay = "'Playfair Display', Georgia, serif";
