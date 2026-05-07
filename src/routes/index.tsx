@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { LabinaShell } from "@/components/labina/Layout";
-import { useLabinaTheme, fontArabic, fontMono, fontSans, type Palette } from "@/components/labina/theme";
+import { useLabinaTheme, fontArabic, fontSans, type Palette } from "@/components/labina/theme";
+import mosqueImg from "@/assets/project-mosque.jpg";
+import schoolImg from "@/assets/project-quran-school.jpg";
+import orphanageImg from "@/assets/project-orphanage.jpg";
+import wellImg from "@/assets/project-well.jpg";
 
 export const Route = createFileRoute("/")({
   component: LabinaLanding,
@@ -25,8 +29,86 @@ export const Route = createFileRoute("/")({
 const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.labina.app";
 const MEMBER_THRESHOLD = 500;
 const CURRENT_MEMBERS = 312;
-const PROJECT_GOAL = 200_000;
+const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
+const PROJECTS = [
+  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", tag: "Lieu de culte", goal: 200_000, image: mosqueImg, alt: "Mosquée moderne au coucher du soleil" },
+  { key: "school", label: "Dar al-Qur'an — Lyon", tag: "École coranique", goal: 120_000, image: schoolImg, alt: "Enfants étudiant le Coran" },
+  { key: "orphanage", label: "Orphelinat — Mali", tag: "Humanitaire", goal: 80_000, image: orphanageImg, alt: "Enfants devant un orphelinat" },
+  { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500, image: wellImg, alt: "Villageois autour d'un puits" },
+] as const;
+
+function ProjectRotator({ members, C, index }: { members: number; C: Palette; index: number }) {
+  const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
+  const fillPct = Math.round(Math.min(1, p / 0.85) * 100);
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        aspectRatio: "4 / 3",
+        borderRadius: 12,
+        overflow: "hidden",
+        border: `1px solid ${C.borderDark}`,
+        background: C.cardDark,
+        boxShadow: "0 20px 50px -20px rgba(0,0,0,0.55)",
+      }}
+    >
+      {PROJECTS.map((proj, i) => {
+        const active = i === index;
+        return (
+          <div
+            key={proj.key}
+            aria-hidden={!active}
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: active ? 1 : 0,
+              transform: active ? "scale(1)" : "scale(1.04)",
+              transition: `opacity 0.8s ${ease}, transform 1.2s ${ease}`,
+            }}
+          >
+            <img
+              src={proj.image}
+              alt={proj.alt}
+              loading="lazy"
+              width={1024}
+              height={768}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                filter: `saturate(${0.85 + p * 0.25}) brightness(${0.78 + p * 0.22})`,
+                transition: `filter 0.6s ${ease}`,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: 0, right: 0, bottom: 0,
+                height: `${100 - fillPct}%`,
+                background: `linear-gradient(to top, ${C.dark} 0%, ${C.dark} 55%, transparent 100%)`,
+                transition: `height 0.6s ${ease}`,
+                pointerEvents: "none",
+              }}
+            />
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 65%)`, pointerEvents: "none" }} />
+            <div style={{ position: "absolute", left: 16, right: 16, bottom: 14, color: C.cream, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.gold, marginBottom: 4 }}>{proj.tag}</div>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{proj.label}</div>
+              </div>
+              <div className="labina-num" style={{ fontSize: 12, color: C.cream, background: "rgba(0,0,0,0.4)", padding: "4px 10px", borderRadius: 999, border: `1px solid ${C.borderDark}` }}>
+                {fillPct}% financé
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function useAnimatedNumber(target: number, duration = 1800) {
   const [val, setVal] = useState(0);
@@ -96,7 +178,6 @@ function LabinaLanding() {
   const showCounter = CURRENT_MEMBERS >= MEMBER_THRESHOLD;
 
   const contribution = useMemo(() => Math.ceil(project.goal / members), [members, project.goal]);
-  const emoji = members < 2000 ? "📐" : members < 5000 ? "🧱" : members < 8000 ? "🏗️" : "🏛️";
 
   return (
     <LabinaShell>
@@ -187,7 +268,7 @@ function LabinaLanding() {
                   <div className="labina-num" style={{ fontSize: 36, fontWeight: 600, color: C.cream, marginTop: 4 }}>{contribution.toLocaleString("fr-FR")} €</div>
                   <div className="labina-num" style={{ fontSize: 12, color: C.gold, marginTop: 6 }}>{project.goal.toLocaleString("fr-FR")} € ÷ {members.toLocaleString("fr-FR")} membres</div>
                 </div>
-                <div style={{ fontSize: 44, lineHeight: 1 }}>{emoji}</div>
+                <div style={{ fontSize: 44, lineHeight: 1 }}>🧱</div>
               </div>
               <p style={{ fontStyle: "italic", fontSize: 12, color: C.textFaint, marginTop: 12 }}>Si vous rejoignez maintenant, votre part ne peut que diminuer.</p>
             </div>
