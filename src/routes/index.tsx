@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { LabinaShell } from "@/components/labina/Layout";
 import { useLabinaTheme, fontArabic, fontSans, type Palette } from "@/components/labina/theme";
 
