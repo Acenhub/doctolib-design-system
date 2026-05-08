@@ -1,11 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { LabinaShell } from "@/components/labina/Layout";
 import { useLabinaTheme, fontArabic, fontSans, type Palette } from "@/components/labina/theme";
-import mosqueImg from "@/assets/project-mosque.jpg";
-import schoolImg from "@/assets/project-quran-school.jpg";
-import orphanageImg from "@/assets/project-orphanage.jpg";
-import wellImg from "@/assets/project-well.jpg";
 
 export const Route = createFileRoute("/")({
   component: LabinaLanding,
@@ -32,11 +28,135 @@ const CURRENT_MEMBERS = 312;
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 const PROJECTS = [
-  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", tag: "Lieu de culte", goal: 200_000, image: mosqueImg, alt: "Mosquée moderne au coucher du soleil" },
-  { key: "school", label: "Dar al-Qur'an — Lyon", tag: "École coranique", goal: 120_000, image: schoolImg, alt: "Enfants étudiant le Coran" },
-  { key: "orphanage", label: "Orphelinat — Mali", tag: "Humanitaire", goal: 80_000, image: orphanageImg, alt: "Enfants devant un orphelinat" },
-  { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500, image: wellImg, alt: "Villageois autour d'un puits" },
+  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", tag: "Lieu de culte", goal: 200_000 },
+  { key: "school", label: "Dar al-Qur'an — Lyon", tag: "École coranique", goal: 120_000 },
+  { key: "orphanage", label: "Orphelinat — Mali", tag: "Humanitaire", goal: 80_000 },
+  { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500 },
 ] as const;
+
+// ─── Brique builders : briques qui se posent de bas en haut ──────────────────
+const COLS = 9;
+const ROWS = 6;
+
+function BrickBuilder({
+  p, C, mask, accents,
+}: {
+  p: number;
+  C: Palette;
+  mask: React.ReactNode;
+  accents?: React.ReactNode;
+}) {
+  const total = COLS * ROWS;
+  const filled = Math.round(p * total);
+  const W = 100, H = 100;
+  const bw = W / COLS;
+  const bh = (H - 10) / ROWS;
+  const bricks: React.ReactNode[] = [];
+  for (let rTop = 0; rTop < ROWS; rTop++) {
+    const rFromBottom = ROWS - 1 - rTop;
+    const offset = rFromBottom % 2 === 0 ? 0 : bw / 2;
+    for (let c = 0; c < COLS; c++) {
+      const idxFromBottom = rFromBottom * COLS + c;
+      const placed = idxFromBottom < filled;
+      const delay = (idxFromBottom % COLS) * 0.04 + Math.floor(idxFromBottom / COLS) * 0.06;
+      bricks.push(
+        <rect
+          key={`${rTop}-${c}`}
+          x={c * bw + offset - bw * 0.04}
+          y={10 + rTop * bh}
+          width={bw * 0.92}
+          height={bh * 0.86}
+          rx={0.4}
+          fill={C.gold}
+          style={{
+            transformBox: "fill-box",
+            transformOrigin: "center bottom",
+            transform: placed ? "translateY(0) scaleY(1)" : "translateY(8px) scaleY(0)",
+            opacity: placed ? 1 : 0,
+            transition: `transform 0.5s ${ease} ${delay}s, opacity 0.4s ${ease} ${delay}s`,
+          }}
+        />
+      );
+    }
+  }
+  const maskId = React.useId().replace(/:/g, "");
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <clipPath id={`clip-${maskId}`}>{mask}</clipPath>
+      </defs>
+      <g clipPath={`url(#clip-${maskId})`}>{bricks}</g>
+      <g opacity={0.85} fill="none" stroke={C.cream} strokeWidth={0.6}>{mask}</g>
+      {accents}
+    </svg>
+  );
+}
+
+function MosqueBuilder({ p, C }: { p: number; C: Palette }) {
+  const mask = (
+    <>
+      <path d="M18 96 V52 Q18 38 32 38 H38 V28 Q38 16 50 16 Q62 16 62 28 V38 H68 Q82 38 82 52 V96 Z" />
+      <rect x="48" y="6" width="4" height="12" />
+      <circle cx="50" cy="6" r="2.6" />
+    </>
+  );
+  return <BrickBuilder p={p} C={C} mask={mask} accents={
+    <g fill="none" stroke={C.cream} strokeWidth={0.4} opacity={0.5}>
+      <path d="M40 96 V72 H60 V96" />
+      <path d="M44 60 Q50 52 56 60" />
+    </g>
+  }/>;
+}
+
+function SchoolBuilder({ p, C }: { p: number; C: Palette }) {
+  const mask = (
+    <>
+      <path d="M14 96 V44 L50 22 L86 44 V96 Z" />
+    </>
+  );
+  return <BrickBuilder p={p} C={C} mask={mask} accents={
+    <g opacity={0.7}>
+      <text x="50" y="40" textAnchor="middle" fontSize="8" fill={C.cream} fontFamily="serif">ﷲ</text>
+      <rect x="44" y="68" width="12" height="20" fill="none" stroke={C.cream} strokeWidth={0.5} />
+    </g>
+  }/>;
+}
+
+function OrphanageBuilder({ p, C }: { p: number; C: Palette }) {
+  const mask = (
+    <>
+      <path d="M8 96 V52 L28 38 L48 52 V96 Z" />
+      <path d="M48 96 V46 L70 30 L92 46 V96 Z" />
+    </>
+  );
+  return <BrickBuilder p={p} C={C} mask={mask} accents={
+    <g fill="none" stroke={C.cream} strokeWidth={0.4} opacity={0.5}>
+      <rect x="22" y="72" width="10" height="14" />
+      <rect x="64" y="68" width="10" height="14" />
+    </g>
+  }/>;
+}
+
+function WellBuilder({ p, C }: { p: number; C: Palette }) {
+  const mask = (
+    <>
+      <path d="M28 96 V60 H72 V96 Z" />
+      <rect x="32" y="28" width="3" height="34" />
+      <rect x="65" y="28" width="3" height="34" />
+      <path d="M28 30 L72 30 L68 24 L32 24 Z" />
+    </>
+  );
+  return <BrickBuilder p={p} C={C} mask={mask} accents={
+    <path d="M38 70 Q50 76 62 70 T84 70" fill="none" stroke={C.cream} strokeWidth={0.7} opacity={Math.min(1, p * 1.2)} />
+  }/>;
+}
+
+const BUILDERS: Record<string, React.FC<{ p: number; C: Palette }>> = {
+  mosque: MosqueBuilder,
+  school: SchoolBuilder,
+  orphanage: OrphanageBuilder,
+  well: WellBuilder,
+};
 
 function ProjectRotator({ members, C, index }: { members: number; C: Palette; index: number }) {
   const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
@@ -56,6 +176,7 @@ function ProjectRotator({ members, C, index }: { members: number; C: Palette; in
     >
       {PROJECTS.map((proj, i) => {
         const active = i === index;
+        const Builder = BUILDERS[proj.key];
         return (
           <div
             key={proj.key}
@@ -66,34 +187,13 @@ function ProjectRotator({ members, C, index }: { members: number; C: Palette; in
               opacity: active ? 1 : 0,
               transform: active ? "scale(1)" : "scale(1.04)",
               transition: `opacity 0.8s ${ease}, transform 1.2s ${ease}`,
+              padding: "20px 24px 56px",
+              display: "flex",
+              alignItems: "stretch",
+              justifyContent: "center",
             }}
           >
-            <img
-              src={proj.image}
-              alt={proj.alt}
-              loading="lazy"
-              width={1024}
-              height={768}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-                filter: `saturate(${0.85 + p * 0.25}) brightness(${0.78 + p * 0.22})`,
-                transition: `filter 0.6s ${ease}`,
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: 0, right: 0, bottom: 0,
-                height: `${100 - fillPct}%`,
-                background: `linear-gradient(to top, ${C.dark} 0%, ${C.dark} 55%, transparent 100%)`,
-                transition: `height 0.6s ${ease}`,
-                pointerEvents: "none",
-              }}
-            />
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 65%)`, pointerEvents: "none" }} />
+            {active && <Builder p={p} C={C} />}
             <div style={{ position: "absolute", left: 16, right: 16, bottom: 14, color: C.cream, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.gold, marginBottom: 4 }}>{proj.tag}</div>
