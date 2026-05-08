@@ -2,10 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { LabinaShell } from "@/components/labina/Layout";
 import { useLabinaTheme, fontArabic, fontSans, type Palette } from "@/components/labina/theme";
-import mosqueImg from "@/assets/project-mosque.jpg";
-import schoolImg from "@/assets/project-quran-school.jpg";
-import orphanageImg from "@/assets/project-orphanage.jpg";
-import wellImg from "@/assets/project-well.jpg";
 
 export const Route = createFileRoute("/")({
   component: LabinaLanding,
@@ -32,10 +28,10 @@ const CURRENT_MEMBERS = 312;
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 const PROJECTS = [
-  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", tag: "Lieu de culte", goal: 200_000, image: mosqueImg, alt: "Mosquée moderne au coucher du soleil" },
-  { key: "school", label: "Dar al-Qur'an — Lyon", tag: "École coranique", goal: 120_000, image: schoolImg, alt: "Enfants étudiant le Coran" },
-  { key: "orphanage", label: "Orphelinat — Mali", tag: "Humanitaire", goal: 80_000, image: orphanageImg, alt: "Enfants devant un orphelinat" },
-  { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500, image: wellImg, alt: "Villageois autour d'un puits" },
+  { key: "mosque", label: "Mosquée Al-Nour — Paris 18ᵉ", tag: "Lieu de culte", goal: 200_000 },
+  { key: "school", label: "Dar al-Qur'an — Lyon", tag: "École coranique", goal: 120_000 },
+  { key: "orphanage", label: "Orphelinat — Mali", tag: "Humanitaire", goal: 80_000 },
+  { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500 },
 ] as const;
 
 function ProjectRotator({ members, C, index }: { members: number; C: Palette; index: number }) {
