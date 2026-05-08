@@ -34,6 +34,110 @@ const PROJECTS = [
   { key: "well", label: "Puits d'eau potable — Niger", tag: "Accès à l'eau", goal: 4_500 },
 ] as const;
 
+function BrickWall({ p, C }: { p: number; C: Palette }) {
+  const cols = 10, rows = 8;
+  const total = cols * rows;
+  const filled = Math.round(p * total);
+  const bricks = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      const isFilled = idx < filled;
+      const offset = r % 2 === 0 ? 0 : 5;
+      bricks.push(
+        <rect
+          key={idx}
+          x={c * 10 + offset}
+          y={100 - (r + 1) * 6}
+          width={9}
+          height={5}
+          rx={0.6}
+          fill={isFilled ? C.gold : "transparent"}
+          stroke={C.borderDark}
+          strokeWidth={0.3}
+          style={{ transition: `fill 0.6s ${ease}` }}
+        />
+      );
+    }
+  }
+  return <>{bricks}</>;
+}
+
+function MosqueIllustration({ p, C }: { p: number; C: Palette }) {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <clipPath id="m-clip">
+          <path d="M20 100 V55 Q20 40 35 40 H40 V30 Q40 18 50 18 Q60 18 60 30 V40 H65 Q80 40 80 55 V100 Z" />
+          <rect x="48" y="6" width="4" height="14" />
+          <circle cx="50" cy="8" r="3" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#m-clip)"><BrickWall p={p} C={C} /></g>
+      <path d="M20 100 V55 Q20 40 35 40 H40 V30 Q40 18 50 18 Q60 18 60 30 V40 H65 Q80 40 80 55 V100 Z M48 6 h4 v14 h-4z" fill="none" stroke={C.cream} strokeWidth={0.6} opacity={0.7}/>
+      <circle cx="50" cy="8" r="3" fill="none" stroke={C.cream} strokeWidth={0.6} opacity={0.7}/>
+    </svg>
+  );
+}
+
+function SchoolIllustration({ p, C }: { p: number; C: Palette }) {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <clipPath id="s-clip">
+          <path d="M15 100 V45 L50 22 L85 45 V100 Z" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#s-clip)"><BrickWall p={p} C={C} /></g>
+      <path d="M15 100 V45 L50 22 L85 45 V100 Z" fill="none" stroke={C.cream} strokeWidth={0.6} opacity={0.7}/>
+      <rect x="44" y="60" width="12" height="20" fill="none" stroke={C.cream} strokeWidth={0.5} opacity={0.6}/>
+      <text x="50" y="38" textAnchor="middle" fontSize="6" fill={C.cream} opacity={0.7} fontFamily="serif">ﷲ</text>
+    </svg>
+  );
+}
+
+function OrphanageIllustration({ p, C }: { p: number; C: Palette }) {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <clipPath id="o-clip">
+          <path d="M10 100 V50 L30 35 L50 50 V100 Z" />
+          <path d="M50 100 V45 L70 30 L90 45 V100 Z" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#o-clip)"><BrickWall p={p} C={C} /></g>
+      <path d="M10 100 V50 L30 35 L50 50 V100 Z M50 100 V45 L70 30 L90 45 V100 Z" fill="none" stroke={C.cream} strokeWidth={0.6} opacity={0.7}/>
+      <rect x="25" y="70" width="10" height="15" fill="none" stroke={C.cream} strokeWidth={0.5} opacity={0.6}/>
+      <rect x="65" y="65" width="10" height="15" fill="none" stroke={C.cream} strokeWidth={0.5} opacity={0.6}/>
+    </svg>
+  );
+}
+
+function WellIllustration({ p, C }: { p: number; C: Palette }) {
+  return (
+    <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <clipPath id="w-clip">
+          <path d="M30 100 V60 H70 V100 Z" />
+          <rect x="32" y="30" width="3" height="32" />
+          <rect x="65" y="30" width="3" height="32" />
+          <path d="M28 32 L72 32 L68 26 L32 26 Z" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#w-clip)"><BrickWall p={p} C={C} /></g>
+      <path d="M30 100 V60 H70 V100 Z M32 62 V30 M68 62 V30 M28 32 L72 32 L68 26 L32 26 Z" fill="none" stroke={C.cream} strokeWidth={0.6} opacity={0.7}/>
+      <path d="M40 65 Q50 70 60 65 T80 65" fill="none" stroke={C.gold} strokeWidth={0.8} opacity={p}/>
+    </svg>
+  );
+}
+
+const ILLUSTRATIONS: Record<string, React.FC<{ p: number; C: Palette }>> = {
+  mosque: MosqueIllustration,
+  school: SchoolIllustration,
+  orphanage: OrphanageIllustration,
+  well: WellIllustration,
+};
+
 function ProjectRotator({ members, C, index }: { members: number; C: Palette; index: number }) {
   const p = Math.min(1, Math.max(0, (members - 100) / (10000 - 100)));
   const fillPct = Math.round(Math.min(1, p / 0.85) * 100);
@@ -52,6 +156,7 @@ function ProjectRotator({ members, C, index }: { members: number; C: Palette; in
     >
       {PROJECTS.map((proj, i) => {
         const active = i === index;
+        const Ill = ILLUSTRATIONS[proj.key];
         return (
           <div
             key={proj.key}
@@ -62,35 +167,15 @@ function ProjectRotator({ members, C, index }: { members: number; C: Palette; in
               opacity: active ? 1 : 0,
               transform: active ? "scale(1)" : "scale(1.04)",
               transition: `opacity 0.8s ${ease}, transform 1.2s ${ease}`,
+              padding: 16,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <img
-              src={proj.image}
-              alt={proj.alt}
-              loading="lazy"
-              width={1024}
-              height={768}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-                filter: `saturate(${0.85 + p * 0.25}) brightness(${0.78 + p * 0.22})`,
-                transition: `filter 0.6s ${ease}`,
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: 0, right: 0, bottom: 0,
-                height: `${100 - fillPct}%`,
-                background: `linear-gradient(to top, ${C.dark} 0%, ${C.dark} 55%, transparent 100%)`,
-                transition: `height 0.6s ${ease}`,
-                pointerEvents: "none",
-              }}
-            />
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, transparent 65%)`, pointerEvents: "none" }} />
-            <div style={{ position: "absolute", left: 16, right: 16, bottom: 14, color: C.cream, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Ill p={p} C={C} />
+            </div>
+            <div style={{ color: C.cream, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: C.gold, marginBottom: 4 }}>{proj.tag}</div>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{proj.label}</div>
